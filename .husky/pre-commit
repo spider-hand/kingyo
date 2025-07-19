@@ -1,0 +1,15 @@
+cd client
+
+npm run test:unit
+
+npx lint-staged
+
+cd ..
+
+cd server
+
+source .venv/bin/activate
+
+cd ..
+
+pre-commit run --all-files
