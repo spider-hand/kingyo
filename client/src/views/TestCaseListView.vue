@@ -71,7 +71,7 @@
                     </TableCell>
                     <TableCell>
                       <Badge :class="getBadgeStyle(testCase.status)">{{ testCase.status
-                      }}
+                        }}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -357,11 +357,11 @@ const testHistory = [
 const getBadgeStyle = (status: string) => {
   switch (status) {
     case "Design":
-      return "bg-amber-200 text-amber-950";
+      return "bg-amber-200 text-amber-950 border-amber-500 border-2";
     case "Ready":
-      return "bg-emerald-200 text-emerald-950";
+      return "bg-emerald-200 text-emerald-950 border-emerald-500 border-2";
     case "Closed":
-      return "bg-slate-200 text-slate-950";
+      return "bg-slate-200 text-slate-950 border-slate-500 border-2";
     default:
       return "";
   }

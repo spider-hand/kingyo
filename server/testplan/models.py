@@ -1,5 +1,13 @@
 from django.db import models
 
+from .constants import (
+    TEST_PLAN_STATUS,
+    TEST_CASE_STATUS,
+    TEST_CASE_RESULTS,
+    BROWSER_LIST,
+    OS_LIST,
+)
+
 # Create your models here.
 
 
@@ -10,12 +18,8 @@ class TestPlan(models.Model):
     )
     status = models.CharField(
         max_length=20,
-        choices=[
-            ("not_started", "Not Started"),
-            ("in_progress", "In Progress"),
-            ("completed", "Completed"),
-        ],
-        default="not_started",
+        choices=TEST_PLAN_STATUS,
+        default=TEST_PLAN_STATUS[0][0],
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -34,12 +38,8 @@ class TestCase(models.Model):
     )
     status = models.CharField(
         max_length=20,
-        choices=[
-            ("design", "Design"),
-            ("ready", "Ready"),
-            ("closed", "Closed"),
-        ],
-        default="design",
+        choices=TEST_CASE_STATUS,
+        default=TEST_CASE_STATUS[0][0],
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,12 +48,8 @@ class TestCase(models.Model):
     )
     latest_result = models.CharField(
         max_length=20,
-        choices=[
-            ("pass", "Pass"),
-            ("fail", "Fail"),
-            ("in_progress", "In Progress"),
-        ],
-        default="in_progress",
+        choices=TEST_CASE_RESULTS,
+        default=TEST_CASE_RESULTS[0][0],
     )
 
     def __str__(self):
@@ -98,35 +94,18 @@ class TestResult(models.Model):
     )
     result = models.CharField(
         max_length=20,
-        choices=[
-            ("pass", "Pass"),
-            ("fail", "Fail"),
-            ("in_progress", "In Progress"),
-        ],
-        default="in_progress",
+        choices=TEST_CASE_RESULTS,
+        default=TEST_CASE_RESULTS[0][0],
     )
     browser = models.CharField(
         max_length=20,
-        choices=[
-            ("chrome", "Chrome"),
-            ("firefox", "Firefox"),
-            ("safari", "Safari"),
-            ("edge", "Edge"),
-            ("opera", "Opera"),
-        ],
-        default="chrome",
+        choices=BROWSER_LIST,
+        default=BROWSER_LIST[0][0],
     )
     os = models.CharField(
         max_length=20,
-        choices=[
-            ("windows10", "Windows 10"),
-            ("windows11", "Windows 11"),
-            ("macos", "macOS"),
-            ("linux", "Linux"),
-            ("android", "Android"),
-            ("ios", "iOS"),
-        ],
-        default="windows11",
+        choices=OS_LIST,
+        default=OS_LIST[0][0],
     )
     tester = models.ForeignKey(
         "auth.User", related_name="test_results", on_delete=models.CASCADE
@@ -155,12 +134,8 @@ class TestResultStep(models.Model):
     )
     status = models.CharField(
         max_length=20,
-        choices=[
-            ("pass", "Pass"),
-            ("fail", "Fail"),
-            ("in_progress", "In Progress"),
-        ],
-        default="in_progress",
+        choices=TEST_CASE_RESULTS,
+        default=TEST_CASE_RESULTS[0][0],
     )
     comment = models.TextField(
         blank=True,

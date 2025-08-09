@@ -39,16 +39,16 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow class="cursor-pointer" v-for="testPlan in testPlans" :key="testPlan.title"
+          <TableRow class="cursor-pointer" v-for="testPlan in testPlans" :key="testPlan.id"
             @click="$router.push({ name: 'test-case-list', params: { testPlanId: testPlan.id } })">
-            <TableCell>
-              {{ testPlan.title }}
+            <TableCell class="w-[400px] truncate">
+              {{ testPlan.name }}
             </TableCell>
             <TableCell>
-              <Badge :class="getBadgeStyle(testPlan.status)">{{ testPlan.status }}
+              <Badge :class="getBadgeStyle(testPlan.status!)">{{ snakeToTitle(testPlan.status!) }}
               </Badge>
             </TableCell>
-            <TableCell>{{ testPlan.lastUpdated }}</TableCell>
+            <TableCell>{{ new Date(testPlan.updatedAt).toLocaleString() }}</TableCell>
             <TableCell class="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger @click.stop>
@@ -70,8 +70,8 @@
         </TableBody>
       </Table>
     </div>
-    <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :items-per-page="10" :total="50"
-      :default-page="0">
+    <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :items-per-page="10" :total="count"
+      :default-page="1" @update:page="(newVal) => page = newVal">
       <PaginationContent v-slot="{ items }">
         <PaginationPrevious />
 
@@ -118,78 +118,21 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import Badge from '@/components/ui/badge/Badge.vue';
+import useTestPlanQuery from '@/composables/useTestPlanQuery';
+import { snakeToTitle } from '@/utils';
+import { ref } from 'vue';
 
-const testPlans = [
-  {
-    id: 1,
-    title: 'Test Plan 1',
-    status: 'In Progress',
-    lastUpdated: '2023-03-01',
-  },
-  {
-    id: 2,
-    title: 'Test Plan 2',
-    status: 'Completed',
-    lastUpdated: '2023-02-15',
-  },
-  {
-    id: 3,
-    title: 'Test Plan 3',
-    status: 'Not Started',
-    lastUpdated: '2023-01-10',
-  },
-  {
-    id: 4,
-    title: 'Test Plan 4',
-    status: 'In Progress',
-    lastUpdated: '2023-03-05',
-  },
-  {
-    id: 5,
-    title: 'Test Plan 5',
-    status: 'Completed',
-    lastUpdated: '2023-02-20',
-  },
-  {
-    id: 6,
-    title: 'Test Plan 6',
-    status: 'In Progress',
-    lastUpdated: '2023-03-10',
-  },
-  {
-    id: 7,
-    title: 'Test Plan 7',
-    status: 'Not Started',
-    lastUpdated: '2023-01-15',
-  },
-  {
-    id: 8,
-    title: 'Test Plan 8',
-    status: 'In Progress',
-    lastUpdated: '2023-03-12',
-  },
-  {
-    id: 9,
-    title: 'Test Plan 9',
-    status: 'Completed',
-    lastUpdated: '2023-02-25',
-  },
-  {
-    id: 10,
-    title: 'Test Plan 10',
-    status: 'In Progress',
-    lastUpdated: '2023-03-15',
-  }
-]
+const page = ref(1);
+const { testPlans, count } = useTestPlanQuery(page);
 
 const getBadgeStyle = (status: string) => {
   switch (status) {
-    case "In Progress":
-      return "bg-amber-200 text-amber-950";
-    case "Completed":
-      return "bg-emerald-200 text-emerald-950";
-    case "Not Started":
-      return "bg-rose-200 text-rose-950";
+    case "in_progress":
+      return "bg-amber-200 text-amber-950 border-amber-500 border-2";
+    case "completed":
+      return "bg-emerald-200 text-emerald-950 border-emerald-500 border-2";
+    case "not_started":
+      return "bg-rose-200 text-rose-950 border-rose-500 border-2";
     default:
       return "";
   }

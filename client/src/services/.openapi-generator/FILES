@@ -1,0 +1,9 @@
+.openapi-generator-ignore
+apis/TestplansApi.ts
+apis/index.ts
+index.ts
+models/PaginatedTestPlanList.ts
+models/StatusEnum.ts
+models/TestPlan.ts
+models/index.ts
+runtime.ts

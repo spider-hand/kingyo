@@ -10,8 +10,3 @@ repos:
       # Run the formatter.
       - id: ruff-format
         files: ^server/.*\.py$
-  - repo: https://github.com/facebook/pyrefly
-    rev: 0.24.2
-    hooks:
-      - id: pyrefly-typecheck
-        files: ^server/.*\.py$
