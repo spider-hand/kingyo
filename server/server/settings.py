@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "rest_framework",
     "drf_spectacular",
+    "django_filters",
     "corsheaders",
     "testplan",
 ]
@@ -146,6 +147,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "PAGE_SIZE": 10,
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
 # Spectacular settings

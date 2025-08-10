@@ -8,6 +8,10 @@ paths:
     get:
       operationId: listTestplans
       parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
       - name: page
         required: false
         in: query
@@ -20,6 +24,18 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - completed
+          - in_progress
+          - not_started
+        description: |-
+          * `not_started` - Not Started
+          * `in_progress` - In Progress
+          * `completed` - Completed
       tags:
       - testplans
       security:

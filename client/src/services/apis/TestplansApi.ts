@@ -26,8 +26,10 @@ import {
 } from '../models/index';
 
 export interface ListTestplansRequest {
+    name?: string;
     page?: number;
     pageSize?: number;
+    status?: ListTestplansStatusEnum;
 }
 
 export interface RetrieveTestplansRequest {
@@ -44,12 +46,20 @@ export class TestplansApi extends runtime.BaseAPI {
     async listTestplansRaw(requestParameters: ListTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedTestPlanList>> {
         const queryParameters: any = {};
 
+        if (requestParameters['name'] != null) {
+            queryParameters['name'] = requestParameters['name'];
+        }
+
         if (requestParameters['page'] != null) {
             queryParameters['page'] = requestParameters['page'];
         }
 
         if (requestParameters['pageSize'] != null) {
             queryParameters['page_size'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['status'] != null) {
+            queryParameters['status'] = requestParameters['status'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -109,3 +119,13 @@ export class TestplansApi extends runtime.BaseAPI {
     }
 
 }
+
+/**
+ * @export
+ */
+export const ListTestplansStatusEnum = {
+    Completed: 'completed',
+    InProgress: 'in_progress',
+    NotStarted: 'not_started'
+} as const;
+export type ListTestplansStatusEnum = typeof ListTestplansStatusEnum[keyof typeof ListTestplansStatusEnum];

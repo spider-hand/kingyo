@@ -12,15 +12,18 @@
         <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
           <ListFilter class="size-6 text-muted-foreground" />
         </div>
-        <Input class="pl-10" placeholder="Filter by title.." />
+        <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTitleChange" />
       </div>
-      <Select>
+      <Select default-value="all" @update:model-value="onStatusChange">
         <SelectTrigger class="w-[180px]">
           <SelectValue placeholder="Status"></SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             <SelectItem value="all">All</SelectItem>
+            <SelectItem value="not_started">Not Started</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -70,7 +73,7 @@
         </TableBody>
       </Table>
     </div>
-    <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :items-per-page="10" :total="count"
+    <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :page="page" :items-per-page="10" :total="count"
       :default-page="1" @update:page="(newVal) => page = newVal">
       <PaginationContent v-slot="{ items }">
         <PaginationPrevious />
@@ -121,9 +124,30 @@ import Badge from '@/components/ui/badge/Badge.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import { snakeToTitle } from '@/utils';
 import { ref } from 'vue';
+import type { ListTestplansStatusEnum } from '@/services';
+import type { AcceptableValue } from 'reka-ui';
+
 
 const page = ref(1);
-const { testPlans, count } = useTestPlanQuery(page);
+const title = ref('');
+const status = ref<ListTestplansStatusEnum | 'all'>('all');
+const { testPlans, count } = useTestPlanQuery(page, title, status);
+let timer: NodeJS.Timeout | null = null;
+
+const onTitleChange = (newTitle: string | number) => {
+  if (timer) {
+    clearTimeout(timer);
+  }
+  timer = setTimeout(() => {
+    title.value = newTitle as string;
+    page.value = 1;
+  }, 500)
+}
+
+const onStatusChange = (newStatus: AcceptableValue) => {
+  status.value = newStatus as ListTestplansStatusEnum | 'all';
+  page.value = 1;
+}
 
 const getBadgeStyle = (status: string) => {
   switch (status) {
