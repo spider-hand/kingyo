@@ -2,6 +2,7 @@ from django.urls.conf import include
 from django.contrib import admin
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from testplan.urls import urlpatterns as testplan_urls
 
@@ -14,4 +15,6 @@ urlpatterns = [
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("schema/swagger-ui/", SpectacularSwaggerView.as_view(), name="swagger-ui"),
     path("api/v1/", include(api_v1_patterns)),
+    path("api/v1/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/v1/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
 ]

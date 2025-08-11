@@ -1,5 +1,6 @@
 .openapi-generator-ignore
 apis/TestplansApi.ts
+apis/TokenApi.ts
 apis/index.ts
 index.ts
 models/PaginatedTestPlanList.ts
@@ -7,5 +8,7 @@ models/PatchedTestPlan.ts
 models/StatusEnum.ts
 models/TestPlan.ts
 models/TestPlanCreate.ts
+models/TokenObtainPair.ts
+models/TokenRefresh.ts
 models/index.ts
 runtime.ts

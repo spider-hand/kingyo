@@ -18,6 +18,7 @@ const router = createRouter({
           component: () => import('@/views/TestPlanListView.vue'),
           meta: {
             breadcrumb: [{ name: 'Test Plans' }],
+            requiresAuth: true,
           },
         },
         {
@@ -26,6 +27,7 @@ const router = createRouter({
           component: () => import('@/views/TestPlanAddView.vue'),
           meta: {
             breadcrumb: [{ name: 'Test Plans', path: '/test-plans' }, { name: 'Add Test Plan' }],
+            requiresAuth: true,
           },
         },
         {
@@ -34,6 +36,7 @@ const router = createRouter({
           component: () => import('@/views/TestPlanEditView.vue'),
           meta: {
             breadcrumb: [{ name: 'Test Plans', path: '/test-plans' }, { name: 'Edit Test Plan' }],
+            requiresAuth: true,
           },
         },
         {
@@ -42,6 +45,7 @@ const router = createRouter({
           component: () => import('@/views/TestCaseListView.vue'),
           meta: {
             breadcrumb: [{ name: 'Test Plans', path: '/test-plans' }, { name: 'Test Cases' }],
+            requiresAuth: true,
           },
         },
         {
@@ -54,6 +58,7 @@ const router = createRouter({
               { name: 'Test Cases', path: '/test-cases' },
               { name: 'Define Test Case' },
             ],
+            requiresAuth: true,
           },
         },
         {
@@ -66,6 +71,7 @@ const router = createRouter({
               { name: 'Test Cases', path: '/test-cases' },
               { name: 'Execute Test Case' },
             ],
+            requiresAuth: true,
           },
         },
         {
@@ -78,6 +84,7 @@ const router = createRouter({
               { name: 'Test Cases', path: '/test-cases' },
               { name: 'Test Case Result' },
             ],
+            requiresAuth: true,
           },
         },
       ],
@@ -88,6 +95,15 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('kingyo_access_token')
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -27,7 +27,7 @@
           <span class="text-muted-foreground">user1@example.com</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem @click="$router.push({ name: 'login' })">Sign out</DropdownMenuItem>
+        <DropdownMenuItem @click="signOut">Sign out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   </header>
@@ -51,9 +51,12 @@ import BreadcrumbSeparator from './ui/breadcrumb/BreadcrumbSeparator.vue';
 import BreadcrumbLink from './ui/breadcrumb/BreadcrumbLink.vue';
 import { computed } from 'vue';
 import BreadcrumbPage from './ui/breadcrumb/BreadcrumbPage.vue';
+import useTokenApi from '@/composables/useTokenApi';
 
 const route = useRoute()
 const breadcrumb = computed(() => {
   return route.meta.breadcrumb || []
 })
+
+const { signOut } = useTokenApi()
 </script>
