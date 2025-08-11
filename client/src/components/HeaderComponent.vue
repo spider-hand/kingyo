@@ -5,7 +5,8 @@
       <BreadcrumbList>
         <template v-if="breadcrumb.length" v-for="(item, index) in breadcrumb" :key="index">
           <BreadcrumbItem>
-            <BreadcrumbLink v-if="index < breadcrumb.length - 1" :href="item.path">{{ item.name }}
+            <BreadcrumbLink v-if="index < breadcrumb.length - 1 && item.path">
+              <RouterLink :to="item.path">{{ item.name }}</RouterLink>
             </BreadcrumbLink>
             <BreadcrumbPage v-else>{{ item.name }}</BreadcrumbPage>
           </BreadcrumbItem>

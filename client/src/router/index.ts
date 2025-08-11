@@ -29,7 +29,7 @@ const router = createRouter({
           },
         },
         {
-          path: '/test-plans/edit/:id',
+          path: '/test-plans/:id/edit',
           name: 'test-plan-edit',
           component: () => import('@/views/TestPlanEditView.vue'),
           meta: {

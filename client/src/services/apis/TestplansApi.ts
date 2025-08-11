@@ -16,14 +16,28 @@
 import * as runtime from '../runtime';
 import type {
   PaginatedTestPlanList,
+  PatchedTestPlan,
   TestPlan,
+  TestPlanCreate,
 } from '../models/index';
 import {
     PaginatedTestPlanListFromJSON,
     PaginatedTestPlanListToJSON,
+    PatchedTestPlanFromJSON,
+    PatchedTestPlanToJSON,
     TestPlanFromJSON,
     TestPlanToJSON,
+    TestPlanCreateFromJSON,
+    TestPlanCreateToJSON,
 } from '../models/index';
+
+export interface CreateTestplansRequest {
+    testPlanCreate: TestPlanCreate;
+}
+
+export interface DestroyTestplansRequest {
+    id: number;
+}
 
 export interface ListTestplansRequest {
     name?: string;
@@ -32,14 +46,94 @@ export interface ListTestplansRequest {
     status?: ListTestplansStatusEnum;
 }
 
+export interface PartialUpdateTestplansRequest {
+    id: number;
+    patchedTestPlan?: Omit<PatchedTestPlan, 'id'|'created_at'|'updated_at'>;
+}
+
 export interface RetrieveTestplansRequest {
     id: number;
+}
+
+export interface UpdateTestplansRequest {
+    id: number;
+    testPlan: Omit<TestPlan, 'id'|'created_at'|'updated_at'>;
 }
 
 /**
  * 
  */
 export class TestplansApi extends runtime.BaseAPI {
+
+    /**
+     */
+    async createTestplansRaw(requestParameters: CreateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestPlanCreate>> {
+        if (requestParameters['testPlanCreate'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanCreate',
+                'Required parameter "testPlanCreate" was null or undefined when calling createTestplans().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TestPlanCreateToJSON(requestParameters['testPlanCreate']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestPlanCreateFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async createTestplans(requestParameters: CreateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestPlanCreate> {
+        const response = await this.createTestplansRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async destroyTestplansRaw(requestParameters: DestroyTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling destroyTestplans().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async destroyTestplans(requestParameters: DestroyTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.destroyTestplansRaw(requestParameters, initOverrides);
+    }
 
     /**
      */
@@ -86,6 +180,43 @@ export class TestplansApi extends runtime.BaseAPI {
 
     /**
      */
+    async partialUpdateTestplansRaw(requestParameters: PartialUpdateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestPlan>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling partialUpdateTestplans().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PatchedTestPlanToJSON(requestParameters['patchedTestPlan']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestPlanFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async partialUpdateTestplans(requestParameters: PartialUpdateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestPlan> {
+        const response = await this.partialUpdateTestplansRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async retrieveTestplansRaw(requestParameters: RetrieveTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestPlan>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
@@ -115,6 +246,50 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async retrieveTestplans(requestParameters: RetrieveTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestPlan> {
         const response = await this.retrieveTestplansRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async updateTestplansRaw(requestParameters: UpdateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestPlan>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling updateTestplans().'
+            );
+        }
+
+        if (requestParameters['testPlan'] == null) {
+            throw new runtime.RequiredError(
+                'testPlan',
+                'Required parameter "testPlan" was null or undefined when calling updateTestplans().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TestPlanToJSON(requestParameters['testPlan']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestPlanFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async updateTestplans(requestParameters: UpdateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestPlan> {
+        const response = await this.updateTestplansRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

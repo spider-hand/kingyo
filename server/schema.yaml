@@ -49,6 +49,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedTestPlanList'
           description: ''
+    post:
+      operationId: createTestplans
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestPlanCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestPlanCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestPlanCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestPlanCreate'
+          description: ''
   /api/v1/testplans/{id}/:
     get:
       operationId: retrieveTestplans
@@ -72,6 +99,91 @@ paths:
               schema:
                 $ref: '#/components/schemas/TestPlan'
           description: ''
+    put:
+      operationId: updateTestplans
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this test plan.
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestPlan'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestPlan'
+          description: ''
+    patch:
+      operationId: partialUpdateTestplans
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this test plan.
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTestPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTestPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTestPlan'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestPlan'
+          description: ''
+    delete:
+      operationId: destroyTestplans
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this test plan.
+        required: true
+      tags:
+      - testplans
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
     PaginatedTestPlanList:
@@ -97,6 +209,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TestPlan'
+    PatchedTestPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
     StatusEnum:
       enum:
       - not_started
@@ -133,6 +266,14 @@ components:
       - id
       - name
       - updated_at
+    TestPlanCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+      required:
+      - name
   securitySchemes:
     basicAuth:
       type: http

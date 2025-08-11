@@ -63,7 +63,7 @@
                   <DropdownMenuItem @click="$router.push({ name: 'test-plan-edit', params: { id: testPlan.id } })">
                     <Pencil class="mr-2" />Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem class="text-red-600">
+                  <DropdownMenuItem class="text-red-600!" @click="onConfirmDeletion(testPlan.id)">
                     <Trash class="mr-2 text-red-600" />Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -88,6 +88,18 @@
         <PaginationNext />
       </PaginationContent>
     </Pagination>
+    <AlertDialog :open="openDeleteDialog">
+      <AlertDialogContent>
+        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This will delete <strong>{{ selectedTestPlan?.name }}</strong> and all associated test cases.
+        </AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="onCancelDeletion">Cancel</AlertDialogCancel>
+          <Button variant="destructive" @click="onDeleteTestPlan">Delete</Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
 
@@ -123,15 +135,24 @@ import {
 import Badge from '@/components/ui/badge/Badge.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import { snakeToTitle } from '@/utils';
-import { ref } from 'vue';
 import type { ListTestplansStatusEnum } from '@/services';
 import type { AcceptableValue } from 'reka-ui';
+import AlertDialog from '@/components/ui/alert-dialog/AlertDialog.vue';
+import AlertDialogContent from '@/components/ui/alert-dialog/AlertDialogContent.vue';
+import AlertDialogTitle from '@/components/ui/alert-dialog/AlertDialogTitle.vue';
+import AlertDialogDescription from '@/components/ui/alert-dialog/AlertDialogDescription.vue';
+import AlertDialogFooter from '@/components/ui/alert-dialog/AlertDialogFooter.vue';
+import AlertDialogCancel from '@/components/ui/alert-dialog/AlertDialogCancel.vue';
+import { computed, ref } from 'vue';
 
 
-const page = ref(1);
-const title = ref('');
-const status = ref<ListTestplansStatusEnum | 'all'>('all');
-const { testPlans, count } = useTestPlanQuery(page, title, status);
+const selectedTestPlanId = ref<number | null>(null);
+const selectedTestPlan = computed(() => {
+  return selectedTestPlanId.value ? testPlans.value?.find(plan => plan.id === selectedTestPlanId.value) : null;
+});
+const openDeleteDialog = ref(false);
+
+const { testPlans, count, page, title, status, mutateOnDeleteTestPlan } = useTestPlanQuery();
 let timer: NodeJS.Timeout | null = null;
 
 const onTitleChange = (newTitle: string | number) => {
@@ -141,12 +162,34 @@ const onTitleChange = (newTitle: string | number) => {
   timer = setTimeout(() => {
     title.value = newTitle as string;
     page.value = 1;
-  }, 500)
+  }, 500);
 }
 
 const onStatusChange = (newStatus: AcceptableValue) => {
   status.value = newStatus as ListTestplansStatusEnum | 'all';
   page.value = 1;
+}
+
+const onConfirmDeletion = (id: number) => {
+  openDeleteDialog.value = true;
+  selectedTestPlanId.value = id;
+}
+
+const onCancelDeletion = () => {
+  openDeleteDialog.value = false;
+  selectedTestPlanId.value = null;
+}
+
+const onDeleteTestPlan = async () => {
+  if (!selectedTestPlanId.value) return;
+  try {
+    await mutateOnDeleteTestPlan(selectedTestPlanId.value);
+  } catch (error) {
+    console.error("Failed to delete test plan:", error);
+  } finally {
+    openDeleteDialog.value = false;
+    selectedTestPlanId.value = null;
+  }
 }
 
 const getBadgeStyle = (status: string) => {
