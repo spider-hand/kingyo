@@ -45,7 +45,7 @@
           <TableRow class="cursor-pointer" v-for="testPlan in testPlans" :key="testPlan.id"
             @click="$router.push({ name: 'test-case-list', params: { testPlanId: testPlan.id } })">
             <TableCell class="w-[400px] truncate">
-              {{ testPlan.name }}
+              {{ testPlan.title }}
             </TableCell>
             <TableCell>
               <Badge :class="getBadgeStyle(testPlan.status!)">{{ snakeToTitle(testPlan.status!) }}
@@ -92,7 +92,7 @@
       <AlertDialogContent>
         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
         <AlertDialogDescription>
-          This will delete <strong>{{ selectedTestPlan?.name }}</strong> and all associated test cases.
+          This will delete <strong>{{ selectedTestPlan?.title }}</strong> and all associated test cases.
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel @click="onCancelDeletion">Cancel</AlertDialogCancel>

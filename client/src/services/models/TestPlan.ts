@@ -37,7 +37,7 @@ export interface TestPlan {
      * @type {string}
      * @memberof TestPlan
      */
-    name: string;
+    title: string;
     /**
      * 
      * @type {string}
@@ -71,7 +71,7 @@ export interface TestPlan {
  */
 export function instanceOfTestPlan(value: object): value is TestPlan {
     if (!('id' in value) || value['id'] === undefined) return false;
-    if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('title' in value) || value['title'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
@@ -88,7 +88,7 @@ export function TestPlanFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     return {
         
         'id': json['id'],
-        'name': json['name'],
+        'title': json['title'],
         'description': json['description'] == null ? undefined : json['description'],
         'status': json['status'] == null ? undefined : StatusEnumFromJSON(json['status']),
         'createdAt': (new Date(json['created_at'])),
@@ -102,7 +102,7 @@ export function TestPlanToJSON(value?: Omit<TestPlan, 'id'|'created_at'|'updated
     }
     return {
         
-        'name': value['name'],
+        'title': value['title'],
         'description': value['description'],
         'status': StatusEnumToJSON(value['status']),
     };

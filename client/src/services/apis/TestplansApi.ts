@@ -44,6 +44,7 @@ export interface ListTestplansRequest {
     page?: number;
     pageSize?: number;
     status?: ListTestplansStatusEnum;
+    title?: string;
 }
 
 export interface PartialUpdateTestplansRequest {
@@ -154,6 +155,10 @@ export class TestplansApi extends runtime.BaseAPI {
 
         if (requestParameters['status'] != null) {
             queryParameters['status'] = requestParameters['status'];
+        }
+
+        if (requestParameters['title'] != null) {
+            queryParameters['title'] = requestParameters['title'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

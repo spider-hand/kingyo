@@ -12,7 +12,7 @@ from .constants import (
 
 
 class TestPlan(models.Model):
-    name = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
     description = models.TextField(
         blank=True,
     )
@@ -25,14 +25,14 @@ class TestPlan(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class TestCase(models.Model):
     plan = models.ForeignKey(
         TestPlan, related_name="test_cases", on_delete=models.CASCADE
     )
-    name = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
     description = models.TextField(
         blank=True,
     )
@@ -53,7 +53,7 @@ class TestCase(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class TestStep(models.Model):

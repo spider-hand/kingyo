@@ -24,14 +24,14 @@ export interface TestPlanCreate {
      * @type {string}
      * @memberof TestPlanCreate
      */
-    name: string;
+    title: string;
 }
 
 /**
  * Check if a given object implements the TestPlanCreate interface.
  */
 export function instanceOfTestPlanCreate(value: object): value is TestPlanCreate {
-    if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('title' in value) || value['title'] === undefined) return false;
     return true;
 }
 
@@ -45,7 +45,7 @@ export function TestPlanCreateFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'name': json['name'],
+        'title': json['title'],
     };
 }
 
@@ -55,7 +55,7 @@ export function TestPlanCreateToJSON(value?: TestPlanCreate | null): any {
     }
     return {
         
-        'name': value['name'],
+        'title': value['title'],
     };
 }
 

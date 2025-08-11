@@ -55,7 +55,7 @@ const onSubmit = handleSubmit(async (values) => {
 
 const createTestPlan = async (title: string) => {
   try {
-    await mutateOnCreateTestPlan({ name: title });
+    await mutateOnCreateTestPlan({ title: title });
 
     router.push({ name: 'test-plan-list' });
   } catch (error) {

@@ -37,7 +37,7 @@ export interface PatchedTestPlan {
      * @type {string}
      * @memberof PatchedTestPlan
      */
-    name?: string;
+    title?: string;
     /**
      * 
      * @type {string}
@@ -84,7 +84,7 @@ export function PatchedTestPlanFromJSONTyped(json: any, ignoreDiscriminator: boo
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'name': json['name'] == null ? undefined : json['name'],
+        'title': json['title'] == null ? undefined : json['title'],
         'description': json['description'] == null ? undefined : json['description'],
         'status': json['status'] == null ? undefined : StatusEnumFromJSON(json['status']),
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
@@ -98,7 +98,7 @@ export function PatchedTestPlanToJSON(value?: Omit<PatchedTestPlan, 'id'|'create
     }
     return {
         
-        'name': value['name'],
+        'title': value['title'],
         'description': value['description'],
         'status': StatusEnumToJSON(value['status']),
     };

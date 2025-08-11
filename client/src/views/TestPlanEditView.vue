@@ -76,7 +76,7 @@ const formSchema = toTypedSchema(z.object({
 const { handleSubmit, resetForm } = useForm({
   validationSchema: formSchema,
   initialValues: {
-    title: testPlan.value?.name || '',
+    title: testPlan.value?.title || '',
   },
 });
 
@@ -89,7 +89,7 @@ const updateTestPlan = async (title: string, status: ListTestplansStatusEnum) =>
   try {
     await mutateOnUpdateTestPlan({
       id: Number(id),
-      name: title,
+      title: title,
       status: status,
     });
     router.push({ name: 'test-plan-list' });
@@ -103,7 +103,7 @@ watch(testPlan, (newTestPlan) => {
     // Update form values when test plan has been fetched
     resetForm({
       values: {
-        title: newTestPlan.name,
+        title: newTestPlan.title,
         status: newTestPlan.status!,
       }
     })

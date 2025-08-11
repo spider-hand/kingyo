@@ -18,7 +18,7 @@ const useTestPlanQuery = (id?: number) => {
     queryFn: async () => {
       const response = await testplansApi.listTestplans({
         page: page.value,
-        name: title.value !== '' ? title.value : undefined,
+        title: title.value !== '' ? title.value : undefined,
         status: status.value === 'all' ? undefined : status.value,
       })
       return response
@@ -41,10 +41,10 @@ const useTestPlanQuery = (id?: number) => {
   })
 
   const { mutate: mutateOnCreateTestPlan } = useMutation({
-    mutationFn: async (payload: { name: string }) => {
+    mutationFn: async (payload: { title: string }) => {
       return await testplansApi.createTestplans({
         testPlanCreate: {
-          name: payload.name,
+          title: payload.title,
         },
       })
     },
@@ -58,11 +58,11 @@ const useTestPlanQuery = (id?: number) => {
   })
 
   const { mutate: mutateOnUpdateTestPlan } = useMutation({
-    mutationFn: async (payload: { id: number; name: string; status: ListTestplansStatusEnum }) => {
+    mutationFn: async (payload: { id: number; title: string; status: ListTestplansStatusEnum }) => {
       return await testplansApi.partialUpdateTestplans({
         id: payload.id,
         patchedTestPlan: {
-          name: payload.name,
+          title: payload.title,
           status: payload.status,
         },
       })
@@ -77,7 +77,7 @@ const useTestPlanQuery = (id?: number) => {
       queryClient.setQueryData(['testplan', id], (oldData: TestPlan) => {
         return {
           ...oldData,
-          name: title.value,
+          title: title.value,
           status: status.value,
         }
       })

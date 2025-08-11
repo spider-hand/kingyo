@@ -16,7 +16,7 @@ class Command(BaseCommand):
         fake = Faker()
         for _ in range(100):
             TestPlan.objects.create(
-                name=fake.catch_phrase(),
+                title=fake.catch_phrase(),
                 description=fake.paragraph(),
                 status=fake.random_element(TEST_PLAN_STATUS)[0],
             )

@@ -36,6 +36,10 @@ paths:
           * `not_started` - Not Started
           * `in_progress` - In Progress
           * `completed` - Completed
+      - in: query
+        name: title
+        schema:
+          type: string
       tags:
       - testplans
       security:
@@ -215,7 +219,7 @@ components:
         id:
           type: integer
           readOnly: true
-        name:
+        title:
           type: string
           maxLength: 255
         description:
@@ -246,7 +250,7 @@ components:
         id:
           type: integer
           readOnly: true
-        name:
+        title:
           type: string
           maxLength: 255
         description:
@@ -264,16 +268,16 @@ components:
       required:
       - created_at
       - id
-      - name
+      - title
       - updated_at
     TestPlanCreate:
       type: object
       properties:
-        name:
+        title:
           type: string
           maxLength: 255
       required:
-      - name
+      - title
   securitySchemes:
     basicAuth:
       type: http
