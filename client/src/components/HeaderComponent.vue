@@ -14,17 +14,17 @@
         </template>
       </BreadcrumbList>
     </Breadcrumb>
-    <DropdownMenu>
+    <DropdownMenu v-if="currentUser && !isFetchingCurrentUser">
       <DropdownMenuTrigger class="flex items-center gap-2">
         <Avatar>
           <AvatarImage src="" alt="User Avatar" />
-          <AvatarFallback>AA</AvatarFallback>
+          <AvatarFallback>{{ currentUser.username[0] }}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem class="flex flex-col items-start" @select="(e: Event) => e.preventDefault()">
-          <span>User 1</span>
-          <span class="text-muted-foreground">user1@example.com</span>
+          <span>{{ currentUser.username }}</span>
+          <span class="text-muted-foreground">{{ currentUser.email }}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem @click="signOut">Sign out</DropdownMenuItem>
@@ -53,10 +53,13 @@ import { computed } from 'vue';
 import BreadcrumbPage from './ui/breadcrumb/BreadcrumbPage.vue';
 import useTokenApi from '@/composables/useTokenApi';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
+import useUserQuery from '@/composables/useUserQuery';
+
 
 const route = useRoute()
 
 const { signOut } = useTokenApi()
+const { currentUser, isFetchingCurrentUser } = useUserQuery()
 
 const testPlanId = computed(() => {
   const id = route.params.testPlanId
@@ -67,21 +70,21 @@ const { testPlan } = useTestPlanQuery(testPlanId)
 
 const breadcrumb = computed(() => {
   const breadcrumbItems = route.meta.breadcrumb || []
-  
+
   // Resolve dynamic parameters in breadcrumb paths and enhance names
   return breadcrumbItems.map(item => {
     let enhancedItem = { ...item }
-    
+
     // Resolve path parameters
     if (item.path) {
       enhancedItem.path = resolvePath(item.path, route.params)
     }
-    
+
     // Enhance breadcrumb names with dynamic data
     if (item.name === 'Test Cases' && testPlan.value) {
       enhancedItem.name = `Test Cases - ${testPlan.value.title}`
     }
-    
+
     return enhancedItem
   })
 })
@@ -89,7 +92,7 @@ const breadcrumb = computed(() => {
 // Helper function to resolve path parameters
 const resolvePath = (path: string, params: Record<string, string | string[]>) => {
   let resolvedPath = path
-  
+
   // Replace :paramName or {paramName} with actual values
   Object.entries(params).forEach(([key, value]) => {
     const paramValue = Array.isArray(value) ? value[0] : value
@@ -97,7 +100,7 @@ const resolvePath = (path: string, params: Record<string, string | string[]>) =>
       .replace(`:${key}`, paramValue)
       .replace(`{${key}}`, paramValue)
   })
-  
+
   return resolvedPath
 }
 </script>

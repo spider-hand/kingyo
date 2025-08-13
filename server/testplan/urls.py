@@ -1,10 +1,11 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import TestPlanViewSet, TestCaseViewSet, TestResultViewSet
+from .views import TestPlanViewSet, TestCaseViewSet, TestResultViewSet, UserViewSet
 
 # Create router for top-level testplans
 router = routers.DefaultRouter()
 router.register(r"testplans", TestPlanViewSet)
+router.register(r"users", UserViewSet)
 
 # Define nested URLs manually
 urlpatterns = [

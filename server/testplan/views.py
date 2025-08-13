@@ -1,7 +1,10 @@
 # Create your views here.
 
 from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth.models import User
 from .models import TestPlan, TestCase, TestResult
 from .serializers import (
     TestPlanSerializer,
@@ -9,6 +12,7 @@ from .serializers import (
     TestCaseSerializer,
     TestResultSerializer,
     TestResultCreateSerializer,
+    UserSerializer,
 )
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -113,3 +117,18 @@ class TestResultViewSet(
         test_case_id = self.kwargs.get("test_case_id")
         if test_case_id:
             serializer.save(case_id=test_case_id, tester=self.request.user)
+
+
+class UserViewSet(
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = User.objects.filter(is_active=True).order_by("username")
+    serializer_class = UserSerializer
+    pagination_class = None  # Disable pagination
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        """Get the current authenticated user"""
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)

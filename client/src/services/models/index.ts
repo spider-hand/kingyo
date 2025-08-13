@@ -18,3 +18,4 @@ export * from './TestResult';
 export * from './TestResultCreate';
 export * from './TokenObtainPair';
 export * from './TokenRefresh';
+export * from './User';

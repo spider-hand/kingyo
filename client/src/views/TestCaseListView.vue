@@ -69,7 +69,7 @@
                     </TableCell>
                     <TableCell>
                       <Badge :class="getBadgeStyle(testCase.status!)">{{ snakeToTitle(testCase.status!)
-                        }}
+                      }}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -152,7 +152,9 @@
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem v-for="option in testerOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -267,12 +269,13 @@ import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
 import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import useTestResultQuery from '@/composables/useTestResultQuery';
+import useUserQuery from '@/composables/useUserQuery';
 import { TEST_CASE_LATEST_RESULT_OPTIONS, TEST_CASE_RESULT_CONFIGURATION_OPTIONS, TEST_CASE_STATUS_OPTIONS } from '@/consts';
 import { ListTestplansTestcasesLatestResultEnum, ListTestplansTestcasesStatusEnum } from '@/services';
 import { formatConfiguration, snakeToTitle } from '@/utils';
 import { Copy, ListFilter, Pencil, Play, Plus, Trash } from 'lucide-vue-next';
 import type { AcceptableValue } from 'reka-ui';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 
@@ -284,6 +287,8 @@ const testPlanId = Number(router.params.testPlanId);
 const { testPlan } = useTestPlanQuery(testPlanId);
 const { testCases, count: testCasesCount, page: testCasesPage, title: testCasesTitle, status, latestResult } = useTestCaseQuery(testPlanId);
 const { testResults, count: testResultsCount, page: testResultsPage, title: testResultsTitle, result, tester, configuration } = useTestResultQuery(testPlanId);
+
+const { users, isFetchingUsers } = useUserQuery();
 
 const statusOptions = [
   { value: 'all', label: 'All' },
@@ -299,6 +304,23 @@ const configurationOptions = [
   { value: 'all', label: 'All' },
   ...TEST_CASE_RESULT_CONFIGURATION_OPTIONS
 ]
+
+const testerOptions = computed(() => {
+  if (isFetchingUsers.value || !users.value) {
+    return [{
+      value: 'all',
+      label: 'All'
+    }];
+  } else {
+    return [
+      { value: 'all', label: 'All' },
+      ...users.value.map(user => ({
+        value: user.username,
+        label: user.username
+      }))
+    ];
+  }
+})
 
 let timer: NodeJS.Timeout | null = null;
 
