@@ -14,8 +14,6 @@ from pathlib import Path
 
 from environ import Env
 
-import os
-
 env = Env()
 env.read_env()
 
@@ -168,11 +166,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = (
-    os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-    if os.getenv("CORS_ALLOWED_ORIGINS")
-    else []
-)
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 # JWT settings
 SIMPLE_JWT = {}

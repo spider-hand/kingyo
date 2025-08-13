@@ -20,9 +20,9 @@
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="not_started">Not Started</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem v-for="option in TEST_PLAN_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -54,10 +54,11 @@ import SelectItem from '@/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
-import type { ListTestplansStatusEnum } from '@/services';
+import { TEST_PLAN_STATUS_OPTIONS } from '@/consts';
+import { ListTestplansStatusEnum } from '@/services';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { z } from 'zod';
 

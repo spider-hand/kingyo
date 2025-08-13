@@ -172,6 +172,502 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/testplans/{testPlanId}/testcases/:
+    get:
+      operationId: listTestplansTestcases
+      parameters:
+      - in: query
+        name: latest_result
+        schema:
+          type: string
+          enum:
+          - fail
+          - in_progress
+          - pass
+        description: |-
+          * `pass` - Pass
+          * `fail` - Fail
+          * `in_progress` - In Progress
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - closed
+          - design
+          - ready
+        description: |-
+          * `design` - Design
+          * `ready` - Ready
+          * `closed` - Closed
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: title
+        schema:
+          type: string
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTestCaseList'
+          description: ''
+    post:
+      operationId: createTestplansTestcases
+      parameters:
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCase'
+          description: ''
+  /api/v1/testplans/{testPlanId}/testcases/{id}/:
+    get:
+      operationId: retrieveTestplansTestcases
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCase'
+          description: ''
+    put:
+      operationId: updateTestplansTestcases
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCase'
+          description: ''
+    patch:
+      operationId: partialUpdateTestplansTestcases
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTestCase'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTestCase'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTestCase'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCase'
+          description: ''
+    delete:
+      operationId: destroyTestplansTestcases
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/:
+    get:
+      operationId: listTestplansTestcasesTestresults
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+      - in: query
+        name: configuration
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: result
+        schema:
+          type: string
+          enum:
+          - fail
+          - in_progress
+          - pass
+        description: |-
+          * `pass` - Pass
+          * `fail` - Fail
+          * `in_progress` - In Progress
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: tester
+        schema:
+          type: string
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTestResultList'
+          description: ''
+    post:
+      operationId: createTestplansTestcasesTestresults
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestResultCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestResultCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestResultCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResultCreate'
+          description: ''
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{id}/:
+    get:
+      operationId: retrieveTestplansTestcasesTestresults
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResult'
+          description: ''
+    put:
+      operationId: updateTestplansTestcasesTestresults
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestResult'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestResult'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestResult'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResult'
+          description: ''
+    patch:
+      operationId: partialUpdateTestplansTestcasesTestresults
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTestResult'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTestResult'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTestResult'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResult'
+          description: ''
+    delete:
+      operationId: destroyTestplansTestcasesTestresults
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/testplans/{testPlanId}/testresults/:
+    get:
+      operationId: listTestplansTestresults
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+      - in: query
+        name: configuration
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: result
+        schema:
+          type: string
+          enum:
+          - fail
+          - in_progress
+          - pass
+        description: |-
+          * `pass` - Pass
+          * `fail` - Fail
+          * `in_progress` - In Progress
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: tester
+        schema:
+          type: string
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTestResultList'
+          description: ''
   /api/v1/token:
     post:
       operationId: createToken
@@ -228,6 +724,59 @@ paths:
           description: ''
 components:
   schemas:
+    BrowserEnum:
+      enum:
+      - chrome
+      - firefox
+      - safari
+      - edge
+      - opera
+      type: string
+      description: |-
+        * `chrome` - Chrome
+        * `firefox` - Firefox
+        * `safari` - Safari
+        * `edge` - Edge
+        * `opera` - Opera
+    OsEnum:
+      enum:
+      - windows10
+      - windows11
+      - macos
+      - linux
+      - android
+      - ios
+      type: string
+      description: |-
+        * `windows10` - Windows 10
+        * `windows11` - Windows 11
+        * `macos` - macOS
+        * `linux` - Linux
+        * `android` - Android
+        * `ios` - iOS
+    PaginatedTestCaseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestCase'
     PaginatedTestPlanList:
       type: object
       required:
@@ -251,6 +800,59 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TestPlan'
+    PaginatedTestResultList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestResult'
+    PatchedTestCase:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        executed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        latest_result:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TestCaseStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        plan:
+          type: integer
     PatchedTestPlan:
       type: object
       properties:
@@ -263,7 +865,7 @@ components:
         description:
           type: string
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/TestPlanStatusEnum'
         created_at:
           type: string
           format: date-time
@@ -272,16 +874,93 @@ components:
           type: string
           format: date-time
           readOnly: true
-    StatusEnum:
+    PatchedTestResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        case:
+          type: integer
+        case_title:
+          type: string
+          readOnly: true
+        result:
+          $ref: '#/components/schemas/ResultEnum'
+        configuration:
+          type: string
+          readOnly: true
+        tester:
+          type: integer
+        tester_username:
+          type: string
+          readOnly: true
+        executed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    ResultEnum:
       enum:
-      - not_started
+      - pass
+      - fail
       - in_progress
-      - completed
       type: string
       description: |-
-        * `not_started` - Not Started
+        * `pass` - Pass
+        * `fail` - Fail
         * `in_progress` - In Progress
-        * `completed` - Completed
+    TestCase:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        executed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        latest_result:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TestCaseStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        plan:
+          type: integer
+      required:
+      - created_at
+      - executed_at
+      - id
+      - latest_result
+      - plan
+      - title
+      - updated_at
+    TestCaseStatusEnum:
+      enum:
+      - design
+      - ready
+      - closed
+      type: string
+      description: |-
+        * `design` - Design
+        * `ready` - Ready
+        * `closed` - Closed
     TestPlan:
       type: object
       properties:
@@ -294,7 +973,7 @@ components:
         description:
           type: string
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/TestPlanStatusEnum'
         created_at:
           type: string
           format: date-time
@@ -316,6 +995,70 @@ components:
           maxLength: 255
       required:
       - title
+    TestPlanStatusEnum:
+      enum:
+      - not_started
+      - in_progress
+      - completed
+      type: string
+      description: |-
+        * `not_started` - Not Started
+        * `in_progress` - In Progress
+        * `completed` - Completed
+    TestResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        case:
+          type: integer
+        case_title:
+          type: string
+          readOnly: true
+        result:
+          $ref: '#/components/schemas/ResultEnum'
+        configuration:
+          type: string
+          readOnly: true
+        tester:
+          type: integer
+        tester_username:
+          type: string
+          readOnly: true
+        executed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - case
+      - case_title
+      - configuration
+      - executed_at
+      - id
+      - tester
+      - tester_username
+      - updated_at
+    TestResultCreate:
+      type: object
+      properties:
+        case:
+          type: integer
+        result:
+          $ref: '#/components/schemas/ResultEnum'
+        browser:
+          $ref: '#/components/schemas/BrowserEnum'
+        os:
+          $ref: '#/components/schemas/OsEnum'
+        tester:
+          type: integer
+      required:
+      - case
+      - tester
     TokenObtainPair:
       type: object
       properties:

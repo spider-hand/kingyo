@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
-      <TitleComponent title="Test Plan 1" />
+      <TitleComponent :title="testPlan?.title ?? ''" />
       <Button v-show="selectedTab === 'define'" @click="$router.push({ name: 'test-case-define' })">
         <Plus class="mr-2" />
         New test case
@@ -18,31 +18,29 @@
             <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
               <ListFilter class="size-6 text-muted-foreground" />
             </div>
-            <Input class="pl-10" placeholder="Filter by title.." />
+            <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestCaseTitleChange" />
           </div>
-          <Select>
+          <Select :default-value="status" @update:model-value="onStatusChange">
             <SelectTrigger class="w-[180px] mr-2">
               <SelectValue placeholder="Status"></SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Design">Design</SelectItem>
-                <SelectItem value="Ready">Ready</SelectItem>
-                <SelectItem value="Closed">Closed</SelectItem>
+                <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Select>
+          <Select :default-value="latestResult" @update:model-value="onLatestOutcomeChange">
             <SelectTrigger class="w-[180px]">
               <SelectValue placeholder="Latest Outcome"></SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="passed">Pass</SelectItem>
-                <SelectItem value="failed">Fail</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem v-for="option in latestResultOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -66,23 +64,25 @@
               <ContextMenu v-for="testCase in testCases" :key="testCase.title">
                 <ContextMenuTrigger as-child>
                   <TableRow class="cursor-pointer" @click="$router.push({ name: 'test-case-define' })">
-                    <TableCell>
+                    <TableCell class="w-[400px] truncate">
                       {{ testCase.title }}
                     </TableCell>
                     <TableCell>
-                      <Badge :class="getBadgeStyle(testCase.status)">{{ testCase.status
+                      <Badge :class="getBadgeStyle(testCase.status!)">{{ snakeToTitle(testCase.status!)
                         }}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <span class="inline-block w-2 h-2 mr-1 rounded-full border-2"
-                        :class="getOutcomeBadge('Passed')"></span>Passed
+                        :class="getResultBadge(testCase.latestResult! as ListTestplansTestcasesLatestResultEnum)"></span>{{
+                          snakeToTitle(testCase.latestResult!)
+                        }}
                     </TableCell>
                     <TableCell>
-                      {{ new Date().toLocaleString() }}
+                      {{ new Date(testCase.updatedAt).toLocaleString() }}
                     </TableCell>
                     <TableCell>
-                      {{ new Date().toLocaleString() }}
+                      {{ new Date(testCase.executedAt!).toLocaleString() }}
                     </TableCell>
                     <TableCell class="text-right">
                       <Button size="icon" variant="ghost" @click.stop="$router.push({ name: 'test-case-execute' })">
@@ -110,8 +110,8 @@
             </TableBody>
           </Table>
         </div>
-        <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :items-per-page="10" :total="50"
-          :default-page="0">
+        <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :items-per-page="10" :total="testCasesCount"
+          :page="testCasesPage" @update:page="(newVal) => testCasesPage = newVal" :default-page="1">
           <PaginationContent v-slot="{ items }">
             <PaginationPrevious />
 
@@ -132,40 +132,39 @@
             <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
               <ListFilter class="size-6 text-muted-foreground" />
             </div>
-            <Input class="pl-10" placeholder="Filter by title.." />
+            <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestResultTitleChange" />
           </div>
-          <Select>
+          <Select :default-value="result" @update:model-value="onTestResultOutcomeChange">
             <SelectTrigger class="w-[180px] mr-2">
               <SelectValue placeholder="Outcome"></SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem v-for="option in latestResultOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Select>
+          <Select :default-value="tester" @update:model-value="onTestResultTesterChange">
             <SelectTrigger class="w-[180px] mr-2">
               <SelectValue placeholder="Tester"></SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">Me</SelectItem>
+                <SelectItem value="all">All</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Select>
+          <Select :default-value="configuration" @update:model-value="onTestResultConfigurationChange">
             <SelectTrigger class="w-[180px]">
               <SelectValue placeholder="Configuration"></SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="chrome">Chrome</SelectItem>
-                <SelectItem value="firefox">Firefox</SelectItem>
-                <SelectItem value="safari">Safari</SelectItem>
-                <SelectItem value="edge">Edge</SelectItem>
-                <SelectItem value="opera">Opera</SelectItem>
+                <SelectItem v-for="option in configurationOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -190,31 +189,31 @@
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow class="cursor-pointer h-[53px]" v-for="testCase in testHistory" :key="testCase.title"
-                @click="$router.push({ name: 'test-case-result', params: { id: testCase.id } })">
-                <TableCell>
-                  {{ testCase.title }}
+              <TableRow class="cursor-pointer h-[53px]" v-for="testResult in testResults" :key="testResult.id"
+                @click="$router.push({ name: 'test-case-result', params: { id: testResult.id } })">
+                <TableCell class="w-[400px] truncate">
+                  {{ testResult.caseTitle }}
                 </TableCell>
                 <TableCell>
                   <span class="inline-block w-2 h-2 mr-1 rounded-full border-2"
-                    :class="getOutcomeBadge(testCase.outcome)"></span>
-                  {{ testCase.outcome }}
+                    :class="getResultBadge(testResult.result!)"></span>
+                  {{ snakeToTitle(testResult.result!) }}
                 </TableCell>
                 <TableCell>
-                  {{ testCase.tester }}
+                  {{ testResult.testerUsername }}
                 </TableCell>
                 <TableCell>
-                  {{ testCase.configuration }}
+                  {{ formatConfiguration(testResult._configuration) }}
                 </TableCell>
                 <TableCell>
-                  {{ new Date().toLocaleString() }}
+                  {{ new Date(testResult.executedAt).toLocaleString() }}
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </div>
-        <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :items-per-page="10" :total="50"
-          :default-page="0">
+        <Pagination class="!justify-end !mx-0 !ml-auto" v-slot="{ page }" :page="testResultsPage" :items-per-page="10"
+          :total="testResultsCount" :default-page="1" @update:page="(newVal) => testResultsPage = newVal">
           <PaginationContent v-slot="{ items }">
             <PaginationPrevious />
 
@@ -265,115 +264,109 @@ import Tabs from '@/components/ui/tabs/Tabs.vue';
 import TabsContent from '@/components/ui/tabs/TabsContent.vue';
 import TabsList from '@/components/ui/tabs/TabsList.vue';
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue';
+import useTestCaseQuery from '@/composables/useTestCaseQuery';
+import useTestPlanQuery from '@/composables/useTestPlanQuery';
+import useTestResultQuery from '@/composables/useTestResultQuery';
+import { TEST_CASE_LATEST_RESULT_OPTIONS, TEST_CASE_RESULT_CONFIGURATION_OPTIONS, TEST_CASE_STATUS_OPTIONS } from '@/consts';
+import { ListTestplansTestcasesLatestResultEnum, ListTestplansTestcasesStatusEnum } from '@/services';
+import { formatConfiguration, snakeToTitle } from '@/utils';
 import { Copy, ListFilter, Pencil, Play, Plus, Trash } from 'lucide-vue-next';
+import type { AcceptableValue } from 'reka-ui';
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
+
 
 const selectedTab = ref<"define" | "execute">('define');
 
-const testCases = [
-  {
-    id: 1,
-    title: 'Test Case 1',
-    status: 'Design',
-  },
-  {
-    id: 2,
-    title: 'Test Case 2',
-    status: 'Ready',
-  },
-  {
-    id: 3,
-    title: 'Test Case 3',
-    status: 'Closed',
-  },
-  {
-    id: 4,
-    title: 'Test Case 4',
-    status: 'Design',
-  },
-  {
-    id: 5,
-    title: 'Test Case 5',
-    status: 'Ready',
-  },
-  {
-    id: 6,
-    title: 'Test Case 6',
-    status: 'Closed',
-  },
+const router = useRoute();
+const testPlanId = Number(router.params.testPlanId);
+
+const { testPlan } = useTestPlanQuery(testPlanId);
+const { testCases, count: testCasesCount, page: testCasesPage, title: testCasesTitle, status, latestResult } = useTestCaseQuery(testPlanId);
+const { testResults, count: testResultsCount, page: testResultsPage, title: testResultsTitle, result, tester, configuration } = useTestResultQuery(testPlanId);
+
+const statusOptions = [
+  { value: 'all', label: 'All' },
+  ...TEST_CASE_STATUS_OPTIONS
+];
+
+const latestResultOptions = [
+  { value: 'all', label: 'All' },
+  ...TEST_CASE_LATEST_RESULT_OPTIONS
+];
+
+const configurationOptions = [
+  { value: 'all', label: 'All' },
+  ...TEST_CASE_RESULT_CONFIGURATION_OPTIONS
 ]
 
-const testHistory = [
-  {
-    id: 1,
-    title: 'Test Case 1',
-    outcome: 'Passed',
-    status: 'Design',
-    tester: 'User A',
-    configuration: 'Chrome on Window 10'
-  },
-  {
-    id: 2,
-    title: 'Test Case 2',
-    outcome: 'Failed',
-    status: 'Ready',
-    tester: 'User B',
-    configuration: 'Firefox on Mac'
-  },
-  {
-    id: 3,
-    title: 'Test Case 3',
-    outcome: 'Passed',
-    status: 'Closed',
-    tester: 'User C',
-    configuration: 'Safari on Mac'
-  },
-  {
-    id: 4,
-    title: 'Test Case 4',
-    outcome: 'Passed',
-    status: 'Design',
-    tester: 'User D',
-    configuration: 'Edge on Windows 11'
-  },
-  {
-    id: 5,
-    title: 'Test Case 5',
-    outcome: 'Passed',
-    status: 'Ready',
-    tester: 'User E',
-    configuration: 'Chrome on Linux'
-  },
-  {
-    id: 6,
-    title: 'Test Case 6',
-    outcome: 'In Progress',
-    status: 'Closed',
-    tester: 'User F',
-    configuration: 'Firefox on Windows 10'
-  },
-]
+let timer: NodeJS.Timeout | null = null;
 
-const getBadgeStyle = (status: string) => {
+const onTestCaseTitleChange = (value: string | number) => {
+  if (timer) {
+    clearTimeout(timer);
+  }
+  timer = setTimeout(() => {
+    testCasesTitle.value = value as string;
+    testCasesPage.value = 1;
+  }, 500);
+};
+
+const onStatusChange = (value: AcceptableValue) => {
+  status.value = value as ListTestplansTestcasesStatusEnum | 'all';
+  testCasesPage.value = 1;
+};
+
+const onLatestOutcomeChange = (value: AcceptableValue) => {
+  latestResult.value = value as ListTestplansTestcasesLatestResultEnum | 'all';
+  testCasesPage.value = 1;
+};
+
+const onTestResultTitleChange = (value: string | number) => {
+  if (timer) {
+    clearTimeout(timer);
+  }
+  timer = setTimeout(() => {
+    testResultsTitle.value = value as string;
+    testResultsPage.value = 1;
+  }, 500);
+};
+
+const onTestResultTesterChange = (value: AcceptableValue) => {
+  tester.value = value as string;
+  testResultsPage.value = 1;
+};
+
+const onTestResultOutcomeChange = (value: AcceptableValue) => {
+  result.value = value as ListTestplansTestcasesLatestResultEnum | 'all';
+  testResultsPage.value = 1;
+};
+
+const onTestResultConfigurationChange = (value: AcceptableValue) => {
+  configuration.value = value as string | 'all';
+  testResultsPage.value = 1;
+};
+
+const getBadgeStyle = (status: ListTestplansTestcasesStatusEnum) => {
   switch (status) {
-    case "Design":
+    case ListTestplansTestcasesStatusEnum.Design:
       return "bg-amber-200 text-amber-950 border-amber-500 border-2";
-    case "Ready":
+    case ListTestplansTestcasesStatusEnum.Ready:
       return "bg-emerald-200 text-emerald-950 border-emerald-500 border-2";
-    case "Closed":
+    case ListTestplansTestcasesStatusEnum.Closed:
       return "bg-slate-200 text-slate-950 border-slate-500 border-2";
     default:
       return "";
   }
 }
 
-const getOutcomeBadge = (outcome: string) => {
-  switch (outcome) {
-    case "Passed":
+const getResultBadge = (result: ListTestplansTestcasesLatestResultEnum) => {
+  switch (result) {
+    case ListTestplansTestcasesLatestResultEnum.Pass:
       return "bg-emerald-500 border-emerald-200";
-    case "Failed":
+    case ListTestplansTestcasesLatestResultEnum.Fail:
       return "bg-rose-500 border-rose-200";
-    case "In Progress":
+    case ListTestplansTestcasesLatestResultEnum.InProgress:
       return "bg-amber-500 border-amber-200";
     default:
       return "";

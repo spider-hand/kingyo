@@ -1,5 +1,5 @@
 <template>
-  <h1 class="text-2xl font-extrabold self-start">{{ title }}
+  <h1 class="text-xl font-semibold self-start">{{ title }}
   </h1>
 </template>
 

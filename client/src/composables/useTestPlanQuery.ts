@@ -1,9 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ListTestplansStatusEnum, TestplansApi, type TestPlan } from '@/services'
 import useApi from './useApi'
-import { ref } from 'vue'
+import { ref, type MaybeRefOrGetter, toValue } from 'vue'
 
-const useTestPlanQuery = (id?: number) => {
+const useTestPlanQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
   const { apiConfig } = useApi()
   const testplansApi = new TestplansApi(apiConfig)
   const queryClient = useQueryClient()
@@ -13,7 +13,7 @@ const useTestPlanQuery = (id?: number) => {
   const status = ref<ListTestplansStatusEnum | 'all'>('all')
   const count = ref(0)
 
-  const { data: testPlans } = useQuery({
+  const { data: testPlans, isFetching: isFetchingTestPlans } = useQuery({
     queryKey: ['testplans', page, title, status],
     queryFn: async () => {
       const response = await testplansApi.listTestplans({
@@ -33,11 +33,12 @@ const useTestPlanQuery = (id?: number) => {
   })
 
   const { data: testPlan, isFetching: isFetchingTestPlan } = useQuery({
-    queryKey: ['testplan', id],
+    queryKey: ['testplan', () => toValue(id)],
     queryFn: async () => {
-      return await testplansApi.retrieveTestplans({ id: id! })
+      const idValue = toValue(id)
+      return await testplansApi.retrieveTestplans({ id: idValue! })
     },
-    enabled: !!id,
+    enabled: () => !!toValue(id),
   })
 
   const { mutate: mutateOnCreateTestPlan } = useMutation({
@@ -57,7 +58,7 @@ const useTestPlanQuery = (id?: number) => {
     },
   })
 
-  const { mutate: mutateOnUpdateTestPlan } = useMutation({
+  const { mutate: mutateOnUpdateTestPlan, isPending: isUpdatingTestPlan } = useMutation({
     mutationFn: async (payload: { id: number; title: string; status: ListTestplansStatusEnum }) => {
       return await testplansApi.partialUpdateTestplans({
         id: payload.id,
@@ -74,21 +75,24 @@ const useTestPlanQuery = (id?: number) => {
         exact: false,
       })
       // Assign the updated test plan to the specific query
-      queryClient.setQueryData(['testplan', id], (oldData: TestPlan) => {
-        return {
-          ...oldData,
-          title: title.value,
-          status: status.value,
-        }
-      })
+      const currentId = toValue(id)
+      if (currentId) {
+        queryClient.setQueryData(['testplan', currentId], (oldData: TestPlan) => {
+          return {
+            ...oldData,
+            title: title.value,
+            status: status.value,
+          }
+        })
+      }
     },
   })
 
-  const { mutate: mutateOnDeleteTestPlan } = useMutation({
-    mutationFn: async (id: number) => {
-      return await testplansApi.destroyTestplans({ id })
+  const { mutate: mutateOnDeleteTestPlan, isPending: isDeletingTestPlan } = useMutation({
+    mutationFn: async (deleteId: number) => {
+      return await testplansApi.destroyTestplans({ id: deleteId })
     },
-    onSuccess: () => {
+    onSuccess: (_, deleteId) => {
       // Refresh the queries for all conditions
       queryClient.invalidateQueries({
         queryKey: ['testplans'],
@@ -97,7 +101,7 @@ const useTestPlanQuery = (id?: number) => {
 
       // Remove the specific test plan from the cache
       queryClient.removeQueries({
-        queryKey: ['testplan', id],
+        queryKey: ['testplan', deleteId],
         exact: true,
       })
     },
@@ -105,13 +109,16 @@ const useTestPlanQuery = (id?: number) => {
 
   return {
     testPlans,
+    testPlan,
     page,
     title,
     status,
     count,
-    mutateOnCreateTestPlan,
-    testPlan,
     isFetchingTestPlan,
+    isFetchingTestPlans,
+    isUpdatingTestPlan,
+    isDeletingTestPlan,
+    mutateOnCreateTestPlan,
     mutateOnUpdateTestPlan,
     mutateOnDeleteTestPlan,
   }

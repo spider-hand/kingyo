@@ -15,28 +15,71 @@
 
 import * as runtime from '../runtime';
 import type {
+  PaginatedTestCaseList,
   PaginatedTestPlanList,
+  PaginatedTestResultList,
+  PatchedTestCase,
   PatchedTestPlan,
+  PatchedTestResult,
+  TestCase,
   TestPlan,
   TestPlanCreate,
+  TestResult,
+  TestResultCreate,
 } from '../models/index';
 import {
+    PaginatedTestCaseListFromJSON,
+    PaginatedTestCaseListToJSON,
     PaginatedTestPlanListFromJSON,
     PaginatedTestPlanListToJSON,
+    PaginatedTestResultListFromJSON,
+    PaginatedTestResultListToJSON,
+    PatchedTestCaseFromJSON,
+    PatchedTestCaseToJSON,
     PatchedTestPlanFromJSON,
     PatchedTestPlanToJSON,
+    PatchedTestResultFromJSON,
+    PatchedTestResultToJSON,
+    TestCaseFromJSON,
+    TestCaseToJSON,
     TestPlanFromJSON,
     TestPlanToJSON,
     TestPlanCreateFromJSON,
     TestPlanCreateToJSON,
+    TestResultFromJSON,
+    TestResultToJSON,
+    TestResultCreateFromJSON,
+    TestResultCreateToJSON,
 } from '../models/index';
 
 export interface CreateTestplansRequest {
     testPlanCreate: TestPlanCreate;
 }
 
+export interface CreateTestplansTestcasesRequest {
+    testPlanId: number;
+    testCase: Omit<TestCase, 'id'|'executed_at'|'latest_result'|'created_at'|'updated_at'>;
+}
+
+export interface CreateTestplansTestcasesTestresultsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    testResultCreate: TestResultCreate;
+}
+
 export interface DestroyTestplansRequest {
     id: number;
+}
+
+export interface DestroyTestplansTestcasesRequest {
+    id: number;
+    testPlanId: number;
+}
+
+export interface DestroyTestplansTestcasesTestresultsRequest {
+    id: number;
+    testCaseId: number;
+    testPlanId: number;
 }
 
 export interface ListTestplansRequest {
@@ -46,18 +89,85 @@ export interface ListTestplansRequest {
     title?: string;
 }
 
+export interface ListTestplansTestcasesRequest {
+    testPlanId: number;
+    latestResult?: ListTestplansTestcasesLatestResultEnum;
+    page?: number;
+    pageSize?: number;
+    status?: ListTestplansTestcasesStatusEnum;
+    title?: string;
+}
+
+export interface ListTestplansTestcasesTestresultsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    _case?: string;
+    _configuration?: string;
+    page?: number;
+    pageSize?: number;
+    result?: ListTestplansTestcasesTestresultsResultEnum;
+    tester?: string;
+}
+
+export interface ListTestplansTestresultsRequest {
+    testPlanId: number;
+    _case?: string;
+    _configuration?: string;
+    page?: number;
+    pageSize?: number;
+    result?: ListTestplansTestresultsResultEnum;
+    tester?: string;
+}
+
 export interface PartialUpdateTestplansRequest {
     id: number;
     patchedTestPlan?: Omit<PatchedTestPlan, 'id'|'created_at'|'updated_at'>;
+}
+
+export interface PartialUpdateTestplansTestcasesRequest {
+    id: number;
+    testPlanId: number;
+    patchedTestCase?: Omit<PatchedTestCase, 'id'|'executed_at'|'latest_result'|'created_at'|'updated_at'>;
+}
+
+export interface PartialUpdateTestplansTestcasesTestresultsRequest {
+    id: number;
+    testCaseId: number;
+    testPlanId: number;
+    patchedTestResult?: Omit<PatchedTestResult, 'id'|'case_title'|'configuration'|'tester_username'|'executed_at'|'updated_at'>;
 }
 
 export interface RetrieveTestplansRequest {
     id: number;
 }
 
+export interface RetrieveTestplansTestcasesRequest {
+    id: number;
+    testPlanId: number;
+}
+
+export interface RetrieveTestplansTestcasesTestresultsRequest {
+    id: number;
+    testCaseId: number;
+    testPlanId: number;
+}
+
 export interface UpdateTestplansRequest {
     id: number;
     testPlan: Omit<TestPlan, 'id'|'created_at'|'updated_at'>;
+}
+
+export interface UpdateTestplansTestcasesRequest {
+    id: number;
+    testPlanId: number;
+    testCase: Omit<TestCase, 'id'|'executed_at'|'latest_result'|'created_at'|'updated_at'>;
+}
+
+export interface UpdateTestplansTestcasesTestresultsRequest {
+    id: number;
+    testCaseId: number;
+    testPlanId: number;
+    testResult: Omit<TestResult, 'id'|'case_title'|'configuration'|'tester_username'|'executed_at'|'updated_at'>;
 }
 
 /**
@@ -109,6 +219,111 @@ export class TestplansApi extends runtime.BaseAPI {
 
     /**
      */
+    async createTestplansTestcasesRaw(requestParameters: CreateTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestCase>> {
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling createTestplansTestcases().'
+            );
+        }
+
+        if (requestParameters['testCase'] == null) {
+            throw new runtime.RequiredError(
+                'testCase',
+                'Required parameter "testCase" was null or undefined when calling createTestplansTestcases().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/`.replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TestCaseToJSON(requestParameters['testCase']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestCaseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async createTestplansTestcases(requestParameters: CreateTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestCase> {
+        const response = await this.createTestplansTestcasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async createTestplansTestcasesTestresultsRaw(requestParameters: CreateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestResultCreate>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling createTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling createTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testResultCreate'] == null) {
+            throw new runtime.RequiredError(
+                'testResultCreate',
+                'Required parameter "testResultCreate" was null or undefined when calling createTestplansTestcasesTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TestResultCreateToJSON(requestParameters['testResultCreate']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestResultCreateFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async createTestplansTestcasesTestresults(requestParameters: CreateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestResultCreate> {
+        const response = await this.createTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async destroyTestplansRaw(requestParameters: DestroyTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
@@ -143,6 +358,103 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async destroyTestplans(requestParameters: DestroyTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.destroyTestplansRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
+    async destroyTestplansTestcasesRaw(requestParameters: DestroyTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling destroyTestplansTestcases().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling destroyTestplansTestcases().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async destroyTestplansTestcases(requestParameters: DestroyTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.destroyTestplansTestcasesRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
+    async destroyTestplansTestcasesTestresultsRaw(requestParameters: DestroyTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling destroyTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling destroyTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling destroyTestplansTestcasesTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async destroyTestplansTestcasesTestresults(requestParameters: DestroyTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.destroyTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -195,6 +507,198 @@ export class TestplansApi extends runtime.BaseAPI {
 
     /**
      */
+    async listTestplansTestcasesRaw(requestParameters: ListTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedTestCaseList>> {
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestcases().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['latestResult'] != null) {
+            queryParameters['latest_result'] = requestParameters['latestResult'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['page_size'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['status'] != null) {
+            queryParameters['status'] = requestParameters['status'];
+        }
+
+        if (requestParameters['title'] != null) {
+            queryParameters['title'] = requestParameters['title'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/`.replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedTestCaseListFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async listTestplansTestcases(requestParameters: ListTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedTestCaseList> {
+        const response = await this.listTestplansTestcasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTestresultsRaw(requestParameters: ListTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedTestResultList>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling listTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestcasesTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['_case'] != null) {
+            queryParameters['case'] = requestParameters['_case'];
+        }
+
+        if (requestParameters['_configuration'] != null) {
+            queryParameters['configuration'] = requestParameters['_configuration'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['page_size'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['result'] != null) {
+            queryParameters['result'] = requestParameters['result'];
+        }
+
+        if (requestParameters['tester'] != null) {
+            queryParameters['tester'] = requestParameters['tester'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedTestResultListFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTestresults(requestParameters: ListTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedTestResultList> {
+        const response = await this.listTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async listTestplansTestresultsRaw(requestParameters: ListTestplansTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedTestResultList>> {
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['_case'] != null) {
+            queryParameters['case'] = requestParameters['_case'];
+        }
+
+        if (requestParameters['_configuration'] != null) {
+            queryParameters['configuration'] = requestParameters['_configuration'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['page_size'] = requestParameters['pageSize'];
+        }
+
+        if (requestParameters['result'] != null) {
+            queryParameters['result'] = requestParameters['result'];
+        }
+
+        if (requestParameters['tester'] != null) {
+            queryParameters['tester'] = requestParameters['tester'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testresults/`.replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedTestResultListFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async listTestplansTestresults(requestParameters: ListTestplansTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedTestResultList> {
+        const response = await this.listTestplansTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async partialUpdateTestplansRaw(requestParameters: PartialUpdateTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestPlan>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
@@ -237,6 +741,111 @@ export class TestplansApi extends runtime.BaseAPI {
 
     /**
      */
+    async partialUpdateTestplansTestcasesRaw(requestParameters: PartialUpdateTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestCase>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling partialUpdateTestplansTestcases().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling partialUpdateTestplansTestcases().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PatchedTestCaseToJSON(requestParameters['patchedTestCase']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestCaseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async partialUpdateTestplansTestcases(requestParameters: PartialUpdateTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestCase> {
+        const response = await this.partialUpdateTestplansTestcasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async partialUpdateTestplansTestcasesTestresultsRaw(requestParameters: PartialUpdateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestResult>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling partialUpdateTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling partialUpdateTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling partialUpdateTestplansTestcasesTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'PATCH',
+            headers: headerParameters,
+            query: queryParameters,
+            body: PatchedTestResultToJSON(requestParameters['patchedTestResult']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestResultFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async partialUpdateTestplansTestcasesTestresults(requestParameters: PartialUpdateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestResult> {
+        const response = await this.partialUpdateTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async retrieveTestplansRaw(requestParameters: RetrieveTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestPlan>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
@@ -271,6 +880,105 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async retrieveTestplans(requestParameters: RetrieveTestplansRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestPlan> {
         const response = await this.retrieveTestplansRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async retrieveTestplansTestcasesRaw(requestParameters: RetrieveTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestCase>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveTestplansTestcases().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling retrieveTestplansTestcases().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestCaseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async retrieveTestplansTestcases(requestParameters: RetrieveTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestCase> {
+        const response = await this.retrieveTestplansTestcasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async retrieveTestplansTestcasesTestresultsRaw(requestParameters: RetrieveTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestResult>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling retrieveTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling retrieveTestplansTestcasesTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestResultFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async retrieveTestplansTestcasesTestresults(requestParameters: RetrieveTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestResult> {
+        const response = await this.retrieveTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -323,6 +1031,125 @@ export class TestplansApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     */
+    async updateTestplansTestcasesRaw(requestParameters: UpdateTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestCase>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling updateTestplansTestcases().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling updateTestplansTestcases().'
+            );
+        }
+
+        if (requestParameters['testCase'] == null) {
+            throw new runtime.RequiredError(
+                'testCase',
+                'Required parameter "testCase" was null or undefined when calling updateTestplansTestcases().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TestCaseToJSON(requestParameters['testCase']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestCaseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async updateTestplansTestcases(requestParameters: UpdateTestplansTestcasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestCase> {
+        const response = await this.updateTestplansTestcasesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async updateTestplansTestcasesTestresultsRaw(requestParameters: UpdateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TestResult>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling updateTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling updateTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling updateTestplansTestcasesTestresults().'
+            );
+        }
+
+        if (requestParameters['testResult'] == null) {
+            throw new runtime.RequiredError(
+                'testResult',
+                'Required parameter "testResult" was null or undefined when calling updateTestplansTestcasesTestresults().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TestResultToJSON(requestParameters['testResult']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TestResultFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async updateTestplansTestcasesTestresults(requestParameters: UpdateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestResult> {
+        const response = await this.updateTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -334,3 +1161,39 @@ export const ListTestplansStatusEnum = {
     NotStarted: 'not_started'
 } as const;
 export type ListTestplansStatusEnum = typeof ListTestplansStatusEnum[keyof typeof ListTestplansStatusEnum];
+/**
+ * @export
+ */
+export const ListTestplansTestcasesLatestResultEnum = {
+    Fail: 'fail',
+    InProgress: 'in_progress',
+    Pass: 'pass'
+} as const;
+export type ListTestplansTestcasesLatestResultEnum = typeof ListTestplansTestcasesLatestResultEnum[keyof typeof ListTestplansTestcasesLatestResultEnum];
+/**
+ * @export
+ */
+export const ListTestplansTestcasesStatusEnum = {
+    Closed: 'closed',
+    Design: 'design',
+    Ready: 'ready'
+} as const;
+export type ListTestplansTestcasesStatusEnum = typeof ListTestplansTestcasesStatusEnum[keyof typeof ListTestplansTestcasesStatusEnum];
+/**
+ * @export
+ */
+export const ListTestplansTestcasesTestresultsResultEnum = {
+    Fail: 'fail',
+    InProgress: 'in_progress',
+    Pass: 'pass'
+} as const;
+export type ListTestplansTestcasesTestresultsResultEnum = typeof ListTestplansTestcasesTestresultsResultEnum[keyof typeof ListTestplansTestcasesTestresultsResultEnum];
+/**
+ * @export
+ */
+export const ListTestplansTestresultsResultEnum = {
+    Fail: 'fail',
+    InProgress: 'in_progress',
+    Pass: 'pass'
+} as const;
+export type ListTestplansTestresultsResultEnum = typeof ListTestplansTestresultsResultEnum[keyof typeof ListTestplansTestresultsResultEnum];

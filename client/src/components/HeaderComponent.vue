@@ -52,11 +52,52 @@ import BreadcrumbLink from './ui/breadcrumb/BreadcrumbLink.vue';
 import { computed } from 'vue';
 import BreadcrumbPage from './ui/breadcrumb/BreadcrumbPage.vue';
 import useTokenApi from '@/composables/useTokenApi';
+import useTestPlanQuery from '@/composables/useTestPlanQuery';
 
 const route = useRoute()
-const breadcrumb = computed(() => {
-  return route.meta.breadcrumb || []
-})
 
 const { signOut } = useTokenApi()
+
+const testPlanId = computed(() => {
+  const id = route.params.testPlanId
+  return id ? Number(id) : undefined
+})
+
+const { testPlan } = useTestPlanQuery(testPlanId)
+
+const breadcrumb = computed(() => {
+  const breadcrumbItems = route.meta.breadcrumb || []
+  
+  // Resolve dynamic parameters in breadcrumb paths and enhance names
+  return breadcrumbItems.map(item => {
+    let enhancedItem = { ...item }
+    
+    // Resolve path parameters
+    if (item.path) {
+      enhancedItem.path = resolvePath(item.path, route.params)
+    }
+    
+    // Enhance breadcrumb names with dynamic data
+    if (item.name === 'Test Cases' && testPlan.value) {
+      enhancedItem.name = `Test Cases - ${testPlan.value.title}`
+    }
+    
+    return enhancedItem
+  })
+})
+
+// Helper function to resolve path parameters
+const resolvePath = (path: string, params: Record<string, string | string[]>) => {
+  let resolvedPath = path
+  
+  // Replace :paramName or {paramName} with actual values
+  Object.entries(params).forEach(([key, value]) => {
+    const paramValue = Array.isArray(value) ? value[0] : value
+    resolvedPath = resolvedPath
+      .replace(`:${key}`, paramValue)
+      .replace(`{${key}}`, paramValue)
+  })
+  
+  return resolvedPath
+}
 </script>

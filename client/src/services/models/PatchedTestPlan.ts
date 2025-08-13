@@ -13,12 +13,12 @@
  */
 
 import { mapValues } from '../runtime';
-import type { StatusEnum } from './StatusEnum';
+import type { TestPlanStatusEnum } from './TestPlanStatusEnum';
 import {
-    StatusEnumFromJSON,
-    StatusEnumFromJSONTyped,
-    StatusEnumToJSON,
-} from './StatusEnum';
+    TestPlanStatusEnumFromJSON,
+    TestPlanStatusEnumFromJSONTyped,
+    TestPlanStatusEnumToJSON,
+} from './TestPlanStatusEnum';
 
 /**
  * 
@@ -46,10 +46,10 @@ export interface PatchedTestPlan {
     description?: string;
     /**
      * 
-     * @type {StatusEnum}
+     * @type {TestPlanStatusEnum}
      * @memberof PatchedTestPlan
      */
-    status?: StatusEnum;
+    status?: TestPlanStatusEnum;
     /**
      * 
      * @type {Date}
@@ -86,7 +86,7 @@ export function PatchedTestPlanFromJSONTyped(json: any, ignoreDiscriminator: boo
         'id': json['id'] == null ? undefined : json['id'],
         'title': json['title'] == null ? undefined : json['title'],
         'description': json['description'] == null ? undefined : json['description'],
-        'status': json['status'] == null ? undefined : StatusEnumFromJSON(json['status']),
+        'status': json['status'] == null ? undefined : TestPlanStatusEnumFromJSON(json['status']),
         'createdAt': json['created_at'] == null ? undefined : (new Date(json['created_at'])),
         'updatedAt': json['updated_at'] == null ? undefined : (new Date(json['updated_at'])),
     };
@@ -100,7 +100,7 @@ export function PatchedTestPlanToJSON(value?: Omit<PatchedTestPlan, 'id'|'create
         
         'title': value['title'],
         'description': value['description'],
-        'status': StatusEnumToJSON(value['status']),
+        'status': TestPlanStatusEnumToJSON(value['status']),
     };
 }
 

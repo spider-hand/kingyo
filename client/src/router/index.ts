@@ -40,48 +40,51 @@ const router = createRouter({
           },
         },
         {
-          path: '/test-cases',
+          path: '/test-plans/:testPlanId/test-cases',
           name: 'test-case-list',
           component: () => import('@/views/TestCaseListView.vue'),
           meta: {
-            breadcrumb: [{ name: 'Test Plans', path: '/test-plans' }, { name: 'Test Cases' }],
+            breadcrumb: [
+              { name: 'Test Plans', path: '/test-plans' }, 
+              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' }
+            ],
             requiresAuth: true,
           },
         },
         {
-          path: '/test-cases/define',
+          path: '/test-plans/:testPlanId/test-cases/define',
           name: 'test-case-define',
           component: () => import('@/views/TestCaseDefineView.vue'),
           meta: {
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },
-              { name: 'Test Cases', path: '/test-cases' },
+              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
               { name: 'Define Test Case' },
             ],
             requiresAuth: true,
           },
         },
         {
-          path: '/test-cases/execute',
+          path: '/test-plans/:testPlanId/test-cases/:testCaseId/execute',
           name: 'test-case-execute',
           component: () => import('@/views/TestCaseExecuteView.vue'),
           meta: {
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },
-              { name: 'Test Cases', path: '/test-cases' },
+              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
               { name: 'Execute Test Case' },
             ],
             requiresAuth: true,
           },
         },
         {
-          path: '/test-case-results/:id',
+          path: '/test-plans/:testPlanId/test-case-results/:id',
           name: 'test-case-result',
           component: () => import('@/views/TestCaseResultView.vue'),
           meta: {
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },
-              { name: 'Test Cases', path: '/test-cases' },
+              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
               { name: 'Test Case Result' },
             ],
             requiresAuth: true,

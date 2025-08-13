@@ -20,10 +20,9 @@
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="not_started">Not Started</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -135,7 +134,7 @@ import {
 import Badge from '@/components/ui/badge/Badge.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import { snakeToTitle } from '@/utils';
-import type { ListTestplansStatusEnum } from '@/services';
+import { ListTestplansStatusEnum } from '@/services';
 import type { AcceptableValue } from 'reka-ui';
 import AlertDialog from '@/components/ui/alert-dialog/AlertDialog.vue';
 import AlertDialogContent from '@/components/ui/alert-dialog/AlertDialogContent.vue';
@@ -144,6 +143,7 @@ import AlertDialogDescription from '@/components/ui/alert-dialog/AlertDialogDesc
 import AlertDialogFooter from '@/components/ui/alert-dialog/AlertDialogFooter.vue';
 import AlertDialogCancel from '@/components/ui/alert-dialog/AlertDialogCancel.vue';
 import { computed, ref } from 'vue';
+import { TEST_PLAN_STATUS_OPTIONS } from '@/consts';
 
 
 const selectedTestPlanId = ref<number | null>(null);
@@ -153,6 +153,12 @@ const selectedTestPlan = computed(() => {
 const openDeleteDialog = ref(false);
 
 const { testPlans, count, page, title, status, mutateOnDeleteTestPlan } = useTestPlanQuery();
+
+const statusOptions = [
+  { value: 'all', label: 'All' },
+  ...TEST_PLAN_STATUS_OPTIONS
+];
+
 let timer: NodeJS.Timeout | null = null;
 
 const onTitleChange = (newTitle: string | number) => {

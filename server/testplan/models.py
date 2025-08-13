@@ -43,14 +43,23 @@ class TestCase(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    executed_at = models.DateTimeField(
-        blank=True,
-    )
-    latest_result = models.CharField(
-        max_length=20,
-        choices=TEST_CASE_RESULTS,
-        default=TEST_CASE_RESULTS[0][0],
-    )
+
+    @property
+    def latest_test_result(self):
+        """Get the latest test result for this test case."""
+        return self.test_results.order_by("-executed_at").first()
+
+    @property
+    def executed_at(self):
+        """Get the execution time of the latest test result."""
+        latest_result = self.latest_test_result
+        return latest_result.executed_at if latest_result else None
+
+    @property
+    def latest_result(self):
+        """Get the result of the latest test execution."""
+        latest_result = self.latest_test_result
+        return latest_result.result if latest_result else None
 
     def __str__(self):
         return self.title
