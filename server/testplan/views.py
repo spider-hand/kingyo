@@ -1,10 +1,11 @@
 # Create your views here.
 
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
+from django.db import transaction
 from .models import TestPlan, TestCase, TestResult, TestStep, TestResultStep
 from .serializers import (
     TestPlanSerializer,
@@ -15,10 +16,12 @@ from .serializers import (
     UserSerializer,
     TestStepSerializer,
     TestResultStepSerializer,
+    TestResultStepCreateSerializer,
 )
 
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import TestPlanFilter, TestCaseFilter, TestResultFilter
+from drf_spectacular.utils import extend_schema
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -152,6 +155,7 @@ class TestStepViewSet(
 
 class TestResultStepViewSet(
     mixins.ListModelMixin,
+    mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
     queryset = TestResultStep.objects.all().order_by("order")
@@ -162,3 +166,63 @@ class TestResultStepViewSet(
         test_result_id = self.kwargs["test_result_id"]
 
         return TestResultStep.objects.filter(result_id=test_result_id).order_by("order")
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return TestResultStepCreateSerializer
+        return super().get_serializer_class()
+
+    # Manually define the schema because drf-spectacular cannot handle nested serializers in this context
+    @extend_schema(
+        request={
+            "application/json": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "step": {"type": "integer", "nullable": True},
+                        "order": {"type": "integer", "minimum": 0, "format": "int64"},
+                        "action": {"type": "string"},
+                        "expected_result": {"type": "string"},
+                        "status": {"type": "string", "enum": ["pass", "fail", "skip"]},
+                        "comment": {"type": "string"},
+                    },
+                    "required": ["order"],
+                },
+            }
+        },
+        responses={
+            201: {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/TestResultStep"},
+            }
+        },
+        description="Create multiple test result steps at once. Replaces all existing test result steps for the given test result. Expects an array of test result step objects in the request data.",
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Create multiple test result steps at once.
+        Replaces all existing test result steps for the given test result.
+        Expects an array of test result step objects in the request data.
+        """
+        test_result_id = self.kwargs["test_result_id"]
+
+        # Replace all steps in a single transaction
+        with transaction.atomic():
+            # Delete all existing test result steps for this test result
+            TestResultStep.objects.filter(result_id=test_result_id).delete()
+
+            # Create all new steps
+            created_steps = []
+            for step_data in request.data:
+                serializer = self.get_serializer(data=step_data)
+                if not serializer.is_valid():
+                    return Response(
+                        serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
+                step = serializer.save(result_id=test_result_id)
+                created_steps.append(step)
+
+        # Return the created ones
+        response_serializer = TestResultStepSerializer(created_steps, many=True)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)

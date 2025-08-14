@@ -1,6 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './BrowserEnum';
+export * from './CreateTestplansTestcasesTestresultsTestresultstepsRequestInner';
 export * from './OsEnum';
 export * from './PaginatedTestCaseList';
 export * from './PaginatedTestPlanList';

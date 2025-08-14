@@ -61,14 +61,17 @@ const useTestResultQuery = (testPlanId: number, testCaseId?: number, testResultI
   })
 
   // Mutation for creating a new test result
-  const { mutate: mutateOnCreateTestResult, isPending: isCreatingTestResult } = useMutation({
+  const {
+    mutate: mutateOnCreateTestResult,
+    mutateAsync: mutateOnCreateTestResultAsync,
+    isPending: isCreatingTestResult,
+  } = useMutation({
     mutationFn: async (payload: {
       testCaseId: number
       testerId: number
-      result?: ResultEnum
-      browser?: BrowserEnum
-      os?: OsEnum
-      comment?: string
+      result: ResultEnum
+      browser: BrowserEnum
+      os: OsEnum
     }) => {
       return await testplansApi.createTestplansTestcasesTestresults({
         testPlanId,
@@ -79,8 +82,7 @@ const useTestResultQuery = (testPlanId: number, testCaseId?: number, testResultI
           result: payload.result,
           browser: payload.browser,
           os: payload.os,
-          comment: payload.comment,
-        } as TestResultCreate,
+        },
       })
     },
     onSuccess: () => {
@@ -165,6 +167,7 @@ const useTestResultQuery = (testPlanId: number, testCaseId?: number, testResultI
     isUpdatingTestResult,
     isDeletingTestResult,
     mutateOnCreateTestResult,
+    mutateOnCreateTestResultAsync,
     mutateOnUpdateTestResult,
     mutateOnDeleteTestResult,
   }

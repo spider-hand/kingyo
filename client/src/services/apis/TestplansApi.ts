@@ -15,6 +15,7 @@
 
 import * as runtime from '../runtime';
 import type {
+  CreateTestplansTestcasesTestresultsTestresultstepsRequestInner,
   PaginatedTestCaseList,
   PaginatedTestPlanList,
   PaginatedTestResultList,
@@ -30,6 +31,8 @@ import type {
   TestStep,
 } from '../models/index';
 import {
+    CreateTestplansTestcasesTestresultsTestresultstepsRequestInnerFromJSON,
+    CreateTestplansTestcasesTestresultsTestresultstepsRequestInnerToJSON,
     PaginatedTestCaseListFromJSON,
     PaginatedTestCaseListToJSON,
     PaginatedTestPlanListFromJSON,
@@ -70,7 +73,14 @@ export interface CreateTestplansTestcasesRequest {
 export interface CreateTestplansTestcasesTestresultsRequest {
     testCaseId: number;
     testPlanId: number;
-    testResultCreate: TestResultCreate;
+    testResultCreate: Omit<TestResultCreate, 'id'>;
+}
+
+export interface CreateTestplansTestcasesTestresultsTestresultstepsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    testResultId: number;
+    createTestplansTestcasesTestresultsTestresultstepsRequestInner?: Array<CreateTestplansTestcasesTestresultsTestresultstepsRequestInner>;
 }
 
 export interface DestroyTestplansRequest {
@@ -336,6 +346,64 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async createTestplansTestcasesTestresults(requestParameters: CreateTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestResultCreate> {
         const response = await this.createTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Create multiple test result steps at once. Replaces all existing test result steps for the given test result. Expects an array of test result step objects in the request data.
+     */
+    async createTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestResultStep>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling createTestplansTestcasesTestresultsTestresultsteps().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling createTestplansTestcasesTestresultsTestresultsteps().'
+            );
+        }
+
+        if (requestParameters['testResultId'] == null) {
+            throw new runtime.RequiredError(
+                'testResultId',
+                'Required parameter "testResultId" was null or undefined when calling createTestplansTestcasesTestresultsTestresultsteps().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultsteps/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))).replace(`{${"testResultId"}}`, encodeURIComponent(String(requestParameters['testResultId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['createTestplansTestcasesTestresultsTestresultstepsRequestInner']!.map(CreateTestplansTestcasesTestresultsTestresultstepsRequestInnerToJSON),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestResultStepFromJSON));
+    }
+
+    /**
+     * Create multiple test result steps at once. Replaces all existing test result steps for the given test result. Expects an array of test result step objects in the request data.
+     */
+    async createTestplansTestcasesTestresultsTestresultsteps(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStep>> {
+        const response = await this.createTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

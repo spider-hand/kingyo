@@ -1,10 +1,10 @@
-.openapi-generator-ignore
 apis/TestplansApi.ts
 apis/TokenApi.ts
 apis/UsersApi.ts
 apis/index.ts
 index.ts
 models/BrowserEnum.ts
+models/CreateTestplansTestcasesTestresultsTestresultstepsRequestInner.ts
 models/OsEnum.ts
 models/PaginatedTestCaseList.ts
 models/PaginatedTestPlanList.ts

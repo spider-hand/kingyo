@@ -644,6 +644,69 @@ paths:
                 items:
                   $ref: '#/components/schemas/TestResultStep'
           description: ''
+    post:
+      operationId: createTestplansTestcasesTestresultsTestresultsteps
+      description: Create multiple test result steps at once. Replaces all existing
+        test result steps for the given test result. Expects an array of test result
+        step objects in the request data.
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testResultId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  step:
+                    type: integer
+                    nullable: true
+                  order:
+                    type: integer
+                    minimum: 0
+                    format: int64
+                  action:
+                    type: string
+                  expected_result:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                    - pass
+                    - fail
+                    - skip
+                  comment:
+                    type: string
+                required:
+                - order
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestResultStep'
+          description: ''
   /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststeps/:
     get:
       operationId: listTestplansTestcasesTeststeps
@@ -1136,6 +1199,9 @@ components:
     TestResultCreate:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         case:
           type: integer
         result:
@@ -1148,6 +1214,7 @@ components:
           type: integer
       required:
       - case
+      - id
       - tester
     TestResultStep:
       type: object

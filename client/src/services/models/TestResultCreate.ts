@@ -43,6 +43,12 @@ export interface TestResultCreate {
      * @type {number}
      * @memberof TestResultCreate
      */
+    readonly id: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TestResultCreate
+     */
     _case: number;
     /**
      * 
@@ -76,6 +82,7 @@ export interface TestResultCreate {
  * Check if a given object implements the TestResultCreate interface.
  */
 export function instanceOfTestResultCreate(value: object): value is TestResultCreate {
+    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('_case' in value) || value['_case'] === undefined) return false;
     if (!('tester' in value) || value['tester'] === undefined) return false;
     return true;
@@ -91,6 +98,7 @@ export function TestResultCreateFromJSONTyped(json: any, ignoreDiscriminator: bo
     }
     return {
         
+        'id': json['id'],
         '_case': json['case'],
         'result': json['result'] == null ? undefined : ResultEnumFromJSON(json['result']),
         'browser': json['browser'] == null ? undefined : BrowserEnumFromJSON(json['browser']),
@@ -99,7 +107,7 @@ export function TestResultCreateFromJSONTyped(json: any, ignoreDiscriminator: bo
     };
 }
 
-export function TestResultCreateToJSON(value?: TestResultCreate | null): any {
+export function TestResultCreateToJSON(value?: Omit<TestResultCreate, 'id'> | null): any {
     if (value == null) {
         return value;
     }

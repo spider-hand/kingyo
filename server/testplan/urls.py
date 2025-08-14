@@ -66,7 +66,7 @@ urlpatterns = [
     ),
     path(
         "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/testresults/<int:test_result_id>/testresultsteps/",
-        TestResultStepViewSet.as_view({"get": "list"}),
+        TestResultStepViewSet.as_view({"get": "list", "post": "create"}),
         name="testresult-testresultsteps-list",
     ),
 ]

@@ -64,7 +64,8 @@ class TestResultSerializer(serializers.ModelSerializer):
 class TestResultCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestResult
-        fields = ["case", "result", "browser", "os", "tester"]
+        # Need to include "id" explicitly to get access to the created TestResult object's ID on frontend
+        fields = ["id", "case", "result", "browser", "os", "tester"]
 
 
 class TestStepSerializer(serializers.ModelSerializer):
@@ -79,6 +80,24 @@ class TestResultStepSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "result",
+            "step",
+            "order",
+            "action",
+            "expected_result",
+            "status",
+            "comment",
+        ]
+
+
+class TestResultStepCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating test result steps.
+    The 'result' field will be automatically set from the URL parameter.
+    """
+
+    class Meta:
+        model = TestResultStep
+        fields = [
             "step",
             "order",
             "action",
