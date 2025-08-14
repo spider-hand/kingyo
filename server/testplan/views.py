@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
-from .models import TestPlan, TestCase, TestResult
+from .models import TestPlan, TestCase, TestResult, TestStep, TestResultStep
 from .serializers import (
     TestPlanSerializer,
     TestPlanCreateSerializer,
@@ -13,6 +13,8 @@ from .serializers import (
     TestResultSerializer,
     TestResultCreateSerializer,
     UserSerializer,
+    TestStepSerializer,
+    TestResultStepSerializer,
 )
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -132,3 +134,31 @@ class UserViewSet(
         """Get the current authenticated user"""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+
+
+class TestStepViewSet(
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = TestStep.objects.all().order_by("order")
+    serializer_class = TestStepSerializer
+    pagination_class = None  # Disable pagination
+
+    def get_queryset(self):
+        test_case_id = self.kwargs["test_case_id"]
+
+        return TestStep.objects.filter(case_id=test_case_id).order_by("order")
+
+
+class TestResultStepViewSet(
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = TestResultStep.objects.all().order_by("order")
+    serializer_class = TestResultStepSerializer
+    pagination_class = None  # Disable pagination
+
+    def get_queryset(self):
+        test_result_id = self.kwargs["test_result_id"]
+
+        return TestResultStep.objects.filter(result_id=test_result_id).order_by("order")

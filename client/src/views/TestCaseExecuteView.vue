@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
-      <TitleComponent title="Test Case 1" />
+      <TitleComponent :title="testCase?.title ?? ''" />
       <Button>
         <Save class="mr-2" />
         Save
@@ -25,17 +25,17 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <ContextMenu v-for="step in testCase" :key="step.step">
+          <ContextMenu v-for="step in testSteps" :key="step.id">
             <ContextMenuTrigger as-child>
               <TableRow class="cursor-pointer">
                 <TableCell>
-                  {{ step.step }}
+                  {{ step.order }}
                 </TableCell>
                 <TableCell class="whitespace-pre-line align-top">
                   {{ step.action }}
                 </TableCell>
                 <TableCell class="whitespace-pre-line align-top">
-                  {{ step.result }}
+                  {{ step.expectedResult }}
                 </TableCell>
                 <TableCell class="text-right">
                   <Button variant="ghost" size="icon" class="hover:text-green-600">
@@ -87,59 +87,14 @@ import TableCell from '@/components/ui/table/TableCell.vue';
 import TableHead from '@/components/ui/table/TableHead.vue';
 import TableHeader from '@/components/ui/table/TableHeader.vue';
 import TableRow from '@/components/ui/table/TableRow.vue';
+import useTestCaseQuery from '@/composables/useTestCaseQuery';
+import useTestStepQuery from '@/composables/useTestStepQuery';
 import { CircleCheck, CircleX, MessageSquare, Paperclip, Save } from 'lucide-vue-next';
+import { useRoute } from 'vue-router';
 
-
-const testCase = [
-  {
-    step: 1,
-    action: 'Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 2,
-    action: 'Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 3,
-    action: 'Click a button.\nClick a button.\nClick a button.\nClick a button.\nClick a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 4,
-    action: 'Click a button.',
-    result: 'Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal.'
-  },
-  {
-    step: 5,
-    action: 'Click a button.',
-    result: 'Open a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.'
-  },
-  {
-    step: 6,
-    action: 'Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 7,
-    action: 'Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 8,
-    action: 'Click a button.\nClick a button.\nClick a button.\nClick a button.\nClick a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 9,
-    action: 'Click a button.',
-    result: 'Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal.'
-  },
-  {
-    step: 10,
-    action: 'Click a button.',
-    result: 'Open a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.'
-  }
-]
+const route = useRoute();
+const testPlanId = Number(route.params.testPlanId);
+const testCaseId = Number(route.params.testCaseId);
+const { testCase } = useTestCaseQuery(testPlanId, testCaseId);
+const { testSteps } = useTestStepQuery(testPlanId, testCaseId);
 </script>

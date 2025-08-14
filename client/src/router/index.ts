@@ -45,21 +45,21 @@ const router = createRouter({
           component: () => import('@/views/TestCaseListView.vue'),
           meta: {
             breadcrumb: [
-              { name: 'Test Plans', path: '/test-plans' }, 
-              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' }
+              { name: 'Test Plans', path: '/test-plans' },
+              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
             ],
             requiresAuth: true,
           },
         },
         {
-          path: '/test-plans/:testPlanId/test-cases/define',
+          path: '/test-plans/:testPlanId/test-cases/:testCaseId/define',
           name: 'test-case-define',
           component: () => import('@/views/TestCaseDefineView.vue'),
           meta: {
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },
               { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
-              { name: 'Define Test Case' },
+              { name: 'Test Case' },
             ],
             requiresAuth: true,
           },
@@ -72,20 +72,20 @@ const router = createRouter({
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },
               { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
-              { name: 'Execute Test Case' },
+              { name: 'Test Case' },
             ],
             requiresAuth: true,
           },
         },
         {
-          path: '/test-plans/:testPlanId/test-case-results/:id',
+          path: '/test-plans/:testPlanId/test-cases/:testCaseId/test-case-results/:testResultId',
           name: 'test-case-result',
           component: () => import('@/views/TestCaseResultView.vue'),
           meta: {
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },
               { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
-              { name: 'Test Case Result' },
+              { name: 'Test Case' },
             ],
             requiresAuth: true,
           },

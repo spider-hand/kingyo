@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.contrib.auth.models import User
-from testplan.models import TestPlan, TestCase, TestResult
+from testplan.models import TestPlan, TestCase, TestStep, TestResult, TestResultStep
 from faker import Faker
 from testplan.constants import (
     TEST_PLAN_STATUS,
@@ -9,6 +9,7 @@ from testplan.constants import (
     TEST_CASE_RESULTS,
     BROWSER_LIST,
     OS_LIST,
+    TEST_RESULT_STEP_STATUS,
 )
 from environ import Env
 
@@ -56,13 +57,35 @@ class Command(BaseCommand):
                     status=fake.random_element(TEST_CASE_STATUS)[0],
                 )
 
+                test_steps = []
                 for _ in range(10):
-                    TestResult.objects.create(
+                    test_step = TestStep.objects.create(
                         case=test_case,
-                        tester=superuser,
-                        result=fake.random_element(TEST_CASE_RESULTS)[0],
-                        browser=fake.random_element(BROWSER_LIST)[0],
-                        os=fake.random_element(OS_LIST)[0],
+                        order=_ + 1,
+                        action=fake.sentence(),
+                        expected_result=fake.sentence(),
+                    )
+                    test_steps.append(test_step)
+
+                test_result = TestResult.objects.create(
+                    case=test_case,
+                    tester=superuser,
+                    result=fake.random_element(TEST_CASE_RESULTS)[0],
+                    browser=fake.random_element(BROWSER_LIST)[0],
+                    os=fake.random_element(OS_LIST)[0],
+                )
+
+                for test_step in test_steps:
+                    TestResultStep.objects.create(
+                        result=test_result,
+                        step=test_step,
+                        order=test_step.order,
+                        action=test_step.action,
+                        expected_result=test_step.expected_result,
+                        status=fake.random_element(TEST_RESULT_STEP_STATUS)[0],
+                        comment=fake.sentence()
+                        if fake.boolean(chance_of_getting_true=30)
+                        else "",
                     )
 
         self.stdout.write(self.style.SUCCESS("Seed data created successfully."))

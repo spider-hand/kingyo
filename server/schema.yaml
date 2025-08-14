@@ -612,6 +612,65 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultsteps/:
+    get:
+      operationId: listTestplansTestcasesTestresultsTestresultsteps
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testResultId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestResultStep'
+          description: ''
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststeps/:
+    get:
+      operationId: listTestplansTestcasesTeststeps
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestStep'
+          description: ''
   /api/v1/testplans/{testPlanId}/testresults/:
     get:
       operationId: listTestplansTestresults
@@ -1090,6 +1149,65 @@ components:
       required:
       - case
       - tester
+    TestResultStep:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        result:
+          type: integer
+        step:
+          type: integer
+          nullable: true
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        action:
+          type: string
+        expected_result:
+          type: string
+        status:
+          $ref: '#/components/schemas/TestResultStepStatusEnum'
+        comment:
+          type: string
+      required:
+      - id
+      - order
+      - result
+    TestResultStepStatusEnum:
+      enum:
+      - pass
+      - fail
+      - skip
+      type: string
+      description: |-
+        * `pass` - Pass
+        * `fail` - Fail
+        * `skip` - Skip
+    TestStep:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        case:
+          type: integer
+        order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        action:
+          type: string
+        expected_result:
+          type: string
+      required:
+      - case
+      - id
+      - order
     TokenObtainPair:
       type: object
       properties:

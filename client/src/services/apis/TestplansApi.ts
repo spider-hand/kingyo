@@ -26,6 +26,8 @@ import type {
   TestPlanCreate,
   TestResult,
   TestResultCreate,
+  TestResultStep,
+  TestStep,
 } from '../models/index';
 import {
     PaginatedTestCaseListFromJSON,
@@ -50,6 +52,10 @@ import {
     TestResultToJSON,
     TestResultCreateFromJSON,
     TestResultCreateToJSON,
+    TestResultStepFromJSON,
+    TestResultStepToJSON,
+    TestStepFromJSON,
+    TestStepToJSON,
 } from '../models/index';
 
 export interface CreateTestplansRequest {
@@ -107,6 +113,17 @@ export interface ListTestplansTestcasesTestresultsRequest {
     pageSize?: number;
     result?: ListTestplansTestcasesTestresultsResultEnum;
     tester?: string;
+}
+
+export interface ListTestplansTestcasesTestresultsTestresultstepsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    testResultId: number;
+}
+
+export interface ListTestplansTestcasesTeststepsRequest {
+    testCaseId: number;
+    testPlanId: number;
 }
 
 export interface ListTestplansTestresultsRequest {
@@ -631,6 +648,105 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async listTestplansTestcasesTestresults(requestParameters: ListTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedTestResultList> {
         const response = await this.listTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters: ListTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestResultStep>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling listTestplansTestcasesTestresultsTestresultsteps().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestcasesTestresultsTestresultsteps().'
+            );
+        }
+
+        if (requestParameters['testResultId'] == null) {
+            throw new runtime.RequiredError(
+                'testResultId',
+                'Required parameter "testResultId" was null or undefined when calling listTestplansTestcasesTestresultsTestresultsteps().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultsteps/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))).replace(`{${"testResultId"}}`, encodeURIComponent(String(requestParameters['testResultId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestResultStepFromJSON));
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTestresultsTestresultsteps(requestParameters: ListTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStep>> {
+        const response = await this.listTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTeststepsRaw(requestParameters: ListTestplansTestcasesTeststepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestStep>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling listTestplansTestcasesTeststeps().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestcasesTeststeps().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststeps/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestStepFromJSON));
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTeststeps(requestParameters: ListTestplansTestcasesTeststepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestStep>> {
+        const response = await this.listTestplansTestcasesTeststepsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

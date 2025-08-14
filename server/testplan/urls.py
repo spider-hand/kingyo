@@ -1,6 +1,13 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import TestPlanViewSet, TestCaseViewSet, TestResultViewSet, UserViewSet
+from .views import (
+    TestPlanViewSet,
+    TestCaseViewSet,
+    TestResultViewSet,
+    UserViewSet,
+    TestStepViewSet,
+    TestResultStepViewSet,
+)
 
 # Create router for top-level testplans
 router = routers.DefaultRouter()
@@ -29,7 +36,7 @@ urlpatterns = [
         ),
         name="testplan-testcases-detail",
     ),
-    # List all the test results
+    # List all the test results under a test plan
     path(
         "testplans/<int:test_plan_id>/testresults/",
         TestResultViewSet.as_view({"get": "list"}),
@@ -51,5 +58,15 @@ urlpatterns = [
             }
         ),
         name="testcase-testresults-detail",
+    ),
+    path(
+        "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/teststeps/",
+        TestStepViewSet.as_view({"get": "list"}),
+        name="testcase-teststeps-list",
+    ),
+    path(
+        "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/testresults/<int:test_result_id>/testresultsteps/",
+        TestResultStepViewSet.as_view({"get": "list"}),
+        name="testresult-testresultsteps-list",
     ),
 ]

@@ -32,3 +32,9 @@ OS_LIST = [
     ("android", "Android"),
     ("ios", "iOS"),
 ]
+
+TEST_RESULT_STEP_STATUS = [
+    ("pass", "Pass"),
+    ("fail", "Fail"),
+    ("skip", "Skip"),
+]

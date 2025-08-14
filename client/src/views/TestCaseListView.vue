@@ -63,13 +63,14 @@
             <TableBody>
               <ContextMenu v-for="testCase in testCases" :key="testCase.title">
                 <ContextMenuTrigger as-child>
-                  <TableRow class="cursor-pointer" @click="$router.push({ name: 'test-case-define' })">
+                  <TableRow class="cursor-pointer"
+                    @click="$router.push({ name: 'test-case-define', params: { testPlanId, testCaseId: testCase.id } })">
                     <TableCell class="w-[400px] truncate">
                       {{ testCase.title }}
                     </TableCell>
                     <TableCell>
                       <Badge :class="getBadgeStyle(testCase.status!)">{{ snakeToTitle(testCase.status!)
-                      }}
+                        }}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -85,7 +86,8 @@
                       {{ new Date(testCase.executedAt!).toLocaleString() }}
                     </TableCell>
                     <TableCell class="text-right">
-                      <Button size="icon" variant="ghost" @click.stop="$router.push({ name: 'test-case-execute' })">
+                      <Button size="icon" variant="ghost"
+                        @click.stop="$router.push({ name: 'test-case-execute', params: { testPlanId, testCaseId: testCase.id } })">
                         <Play class="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -192,7 +194,7 @@
             </TableHeader>
             <TableBody>
               <TableRow class="cursor-pointer h-[53px]" v-for="testResult in testResults" :key="testResult.id"
-                @click="$router.push({ name: 'test-case-result', params: { id: testResult.id } })">
+                @click="$router.push({ name: 'test-case-result', params: { testPlanId: testPlanId, testCaseId: testResult._case, testResultId: testResult.id } })">
                 <TableCell class="w-[400px] truncate">
                   {{ testResult.caseTitle }}
                 </TableCell>

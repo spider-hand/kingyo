@@ -1,24 +1,21 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-between w-full">
-      <TitleComponent title="Test Case For a Feature" />
+      <TitleComponent :title="testCase?.title ?? ''" />
       <Button @click="$router.push({ name: 'test-case-list' })">
         <Save class="mr-2" />
         Save Changes
       </Button>
     </div>
     <div class="flex flex-row items-center w-full">
-      <Select>
+      <Select v-if="!isFetchingTestCase && testCase" :default-value="testCase.status">
         <SelectTrigger class="w-[180px] mr-2">
           <SelectValue placeholder="Status"></SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="design">Design
-            </SelectItem>
-            <SelectItem value="ready">Ready
-            </SelectItem>
-            <SelectItem value="closed">Closed
+            <SelectItem v-for="status in TEST_CASE_STATUS_OPTIONS" :key="status.value" :value="status.value">
+              {{ status.label }}
             </SelectItem>
           </SelectGroup>
         </SelectContent>
@@ -41,17 +38,17 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <ContextMenu v-for="step in testCase" :key="step.step">
+          <ContextMenu v-for="step in testSteps" :key="step.id">
             <ContextMenuTrigger as-child>
               <TableRow class="cursor-pointer">
                 <TableCell>
-                  {{ step.step }}
+                  {{ step.order }}
                 </TableCell>
                 <TableCell class="whitespace-pre-line align-top">
                   {{ step.action }}
                 </TableCell>
                 <TableCell class="whitespace-pre-line align-top">
-                  {{ step.result }}
+                  {{ step.expectedResult }}
                 </TableCell>
                 <TableCell class="text-right">
                   <Button variant="ghost" size="icon">
@@ -106,59 +103,16 @@ import TableCell from '@/components/ui/table/TableCell.vue';
 import TableHead from '@/components/ui/table/TableHead.vue';
 import TableHeader from '@/components/ui/table/TableHeader.vue';
 import TableRow from '@/components/ui/table/TableRow.vue';
+import useTestCaseQuery from '@/composables/useTestCaseQuery';
+import useTestStepQuery from '@/composables/useTestStepQuery';
+import { TEST_CASE_STATUS_OPTIONS } from '@/consts';
 import { CornerDownRight, MoveDown, MoveUp, Paperclip, Save, Trash } from 'lucide-vue-next';
+import { useRoute } from 'vue-router';
 
+const router = useRoute();
+const testPlanId = Number(router.params.testPlanId);
+const testCaseId = Number(router.params.testCaseId);
 
-const testCase = [
-  {
-    step: 1,
-    action: 'Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 2,
-    action: 'Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 3,
-    action: 'Click a button.\nClick a button.\nClick a button.\nClick a button.\nClick a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 4,
-    action: 'Click a button.',
-    result: 'Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal.'
-  },
-  {
-    step: 5,
-    action: 'Click a button.',
-    result: 'Open a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.'
-  },
-  {
-    step: 6,
-    action: 'Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 7,
-    action: 'Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button. Click a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 8,
-    action: 'Click a button.\nClick a button.\nClick a button.\nClick a button.\nClick a button.',
-    result: 'Open a modal.'
-  },
-  {
-    step: 9,
-    action: 'Click a button.',
-    result: 'Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal. Open a modal.'
-  },
-  {
-    step: 10,
-    action: 'Click a button.',
-    result: 'Open a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.\nOpen a modal.'
-  }
-]
+const { testCase, isFetchingTestCase } = useTestCaseQuery(testPlanId, testCaseId);
+const { testSteps } = useTestStepQuery(testPlanId, testCaseId);
 </script>

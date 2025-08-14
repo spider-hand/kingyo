@@ -20,6 +20,9 @@ models/TestPlanCreate.ts
 models/TestPlanStatusEnum.ts
 models/TestResult.ts
 models/TestResultCreate.ts
+models/TestResultStep.ts
+models/TestResultStepStatusEnum.ts
+models/TestStep.ts
 models/TokenObtainPair.ts
 models/TokenRefresh.ts
 models/User.ts

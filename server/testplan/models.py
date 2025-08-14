@@ -6,6 +6,7 @@ from .constants import (
     TEST_CASE_RESULTS,
     BROWSER_LIST,
     OS_LIST,
+    TEST_RESULT_STEP_STATUS,
 )
 
 # Create your models here.
@@ -131,9 +132,11 @@ class TestResultStep(models.Model):
     result = models.ForeignKey(
         TestResult, related_name="result_steps", on_delete=models.CASCADE
     )
+    # Preserve the TestResultStep as long as the associated TestResult exists
     step = models.ForeignKey(
-        TestStep, related_name="result_steps", on_delete=models.CASCADE
+        TestStep, related_name="result_steps", on_delete=models.SET_NULL, null=True
     )
+    # TestStep can be modified over time so we use fields and set values manually to record the state at the time of execution
     order = models.PositiveIntegerField()
     action = models.TextField(
         blank=True,
@@ -143,8 +146,8 @@ class TestResultStep(models.Model):
     )
     status = models.CharField(
         max_length=20,
-        choices=TEST_CASE_RESULTS,
-        default=TEST_CASE_RESULTS[0][0],
+        choices=TEST_RESULT_STEP_STATUS,
+        default=TEST_RESULT_STEP_STATUS[0][0],
     )
     comment = models.TextField(
         blank=True,
