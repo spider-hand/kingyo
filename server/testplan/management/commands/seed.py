@@ -12,9 +12,12 @@ from testplan.constants import (
     TEST_RESULT_STEP_STATUS,
 )
 from environ import Env
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 env = Env()
-env.read_env()
+env.read_env(BASE_DIR / ".env")
 
 
 class Command(BaseCommand):
@@ -25,9 +28,11 @@ class Command(BaseCommand):
         call_command("flush", interactive=False)
         call_command("migrate", interactive=False)
 
-        username = env.str("DJANGO_SUPERUSER_USERNAME", default="admin")
-        email = env.str("DJANGO_SUPERUSER_EMAIL", default="admin@example.com")
-        password = env.str("DJANGO_SUPERUSER_PASSWORD", default="password")
+        username = env.str("DJANGO_SUPERUSER_USERNAME")
+        email = env.str("DJANGO_SUPERUSER_EMAIL")
+        password = env.str("DJANGO_SUPERUSER_PASSWORD")
+
+        self.stdout.write("Creating superuser..")
 
         call_command(
             "createsuperuser",
@@ -40,6 +45,10 @@ class Command(BaseCommand):
         superuser = User.objects.get(username=username)
         superuser.set_password(password)
         superuser.save()
+
+        self.stdout.write(self.style.SUCCESS("Created superuser successfully."))
+
+        self.stdout.write("Creating seed data..")
 
         fake = Faker()
         for _ in range(100):
