@@ -225,7 +225,7 @@ const saveTestResults = async () => {
           step: step.id,
           order: step.order,
           action: step.action,
-          expected_result: step.expectedResult,
+          expectedResult: step.expectedResult,
           status: stepResults.value[step.id]?.status ?? 'skip',
           comment: stepResults.value[step.id]?.comment ?? '',
         }));

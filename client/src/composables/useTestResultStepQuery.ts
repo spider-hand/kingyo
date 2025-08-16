@@ -32,7 +32,7 @@ const useTestResultStepQuery = (testPlanId: number, testCaseId: number, testResu
           step?: number
           order: number
           action?: string
-          expected_result?: string
+          expectedResult?: string
           status?: TestResultStepStatusEnum
           comment?: string
         }>
