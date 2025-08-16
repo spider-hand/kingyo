@@ -1,14 +1,17 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
-    <div class="flex flex-row items-center justify-between w-full">
-      <TitleComponent :title="updatedTestCaseTitle || 'Loading...'" />
+    <div class="flex flex-row items-center justify-end w-full">
       <Button @click="updateTestCase" :disabled="isUpdatingTestCase || isCreatingTestSteps">
         <LoaderCircle v-if="isUpdatingTestCase || isCreatingTestSteps" class="mr-2 animate-spin" />
         <Save class="mr-2" />
         Save Changes
       </Button>
     </div>
-    <div class="flex flex-row items-center w-full">
+    <div class="flex flex-row items-end gap-4 w-full">
+      <div class="flex flex-col w-full gap-1">
+        <label class="text-xs text-muted-foreground">Title</label>
+        <Input v-model="updatedTestCaseTitle" placeholder="Test Case Title" max="100" />
+      </div>
       <SelectWrapperComponent label="Status">
         <Select v-model="updatedTestCaseStatus" @update:model-value="onTestCaseStatusChange">
           <SelectTrigger class="w-[180px] mr-2">
@@ -104,7 +107,6 @@
 
 <script setup lang="ts">
 import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
-import TitleComponent from '@/components/TitleComponent.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ContextMenu from '@/components/ui/context-menu/ContextMenu.vue';
 import ContextMenuContent from '@/components/ui/context-menu/ContextMenuContent.vue';
@@ -127,11 +129,10 @@ import TableRow from '@/components/ui/table/TableRow.vue';
 import { Textarea } from '@/components/ui/textarea';
 import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestStepQuery from '@/composables/useTestStepQuery';
+import useTestStepEditor from '@/composables/useTestStepEditor';
 import { TEST_CASE_STATUS_OPTIONS } from '@/consts';
-import type { TestCaseStatusEnum, TestStep } from '@/services';
 import { CornerDownRight, LoaderCircle, MoveDown, MoveUp, Paperclip, Save, Trash } from 'lucide-vue-next';
-import type { AcceptableValue } from 'reka-ui';
-import { nextTick, ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -142,86 +143,37 @@ const testCaseId = Number(route.params.testCaseId);
 const { testCase, mutateAsyncOnUpdateTestCase, isUpdatingTestCase } = useTestCaseQuery(testPlanId, testCaseId);
 const { testSteps, mutateOnCreateTestSteps, isCreatingTestSteps } = useTestStepQuery(testPlanId, testCaseId);
 
-const updatedTestCaseTitle = ref('');
-const updatedTestCaseDescription = ref('');
-const updatedTestCaseStatus = ref<TestCaseStatusEnum>('design');
-const updatedTestSteps = ref<Omit<TestStep, 'id' | '_case' | 'order'>[]>([
-  {
-    action: '',
-    expectedResult: ''
-  }
-])
-const selectedStepIndex = ref<number | null>(null);
+const {
+  testCaseTitle: updatedTestCaseTitle,
+  testCaseDescription: updatedTestCaseDescription,
+  testCaseStatus: updatedTestCaseStatus,
+  selectedStepIndex,
+  testSteps: updatedTestSteps,
+  onTestCaseStatusChange,
+  selectStep,
+  onFocusOutTableRow,
+  insertStep,
+  moveStepUp,
+  moveStepDown,
+  deleteStep,
+} = useTestStepEditor()
 
 watch(testCase, (newTestCase) => {
   if (newTestCase) {
-    updatedTestCaseTitle.value = newTestCase.title || '';
-    updatedTestCaseDescription.value = newTestCase.description || '';
-    updatedTestCaseStatus.value = newTestCase.status || 'design';
+    updatedTestCaseTitle.value = newTestCase.title;
+    updatedTestCaseDescription.value = newTestCase.description ?? '';
+    updatedTestCaseStatus.value = newTestCase.status ?? 'design';
   }
 }, { immediate: true });
 
 watch(testSteps, (newTestSteps) => {
   if (newTestSteps && newTestSteps.length > 0) {
-    updatedTestSteps.value = newTestSteps.map(step => ({
-      action: step.action,
-      expectedResult: step.expectedResult
-    }));
+    updatedTestSteps.value = newTestSteps.map((step) => ({
+      action: step.action ?? '',
+      expectedResult: step.expectedResult ?? '',
+    }))
   }
 }, { immediate: true });
-
-const onTestCaseStatusChange = (status: AcceptableValue) => {
-  updatedTestCaseStatus.value = status as TestCaseStatusEnum;
-}
-
-const insertStep = (index: number) => {
-  updatedTestSteps.value.splice(index + 1, 0, {
-    action: '',
-    expectedResult: ''
-  });
-};
-
-const selectStep = async (index: number) => {
-  selectedStepIndex.value = index;
-
-  // Focus on the textarea after it's rendered
-  await nextTick();
-
-  const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-  if (textarea) {
-    textarea.focus();
-  }
-}
-
-const onFocusOutTableRow = (event: FocusEvent) => {
-  // Check if the new focus target is still within the same row
-  const currentRow = (event.currentTarget as HTMLElement);
-  const newFocusTarget = event.relatedTarget as HTMLElement;
-
-  if (!newFocusTarget || !currentRow.contains(newFocusTarget)) {
-    selectedStepIndex.value = null;
-  }
-}
-
-const moveStepUp = (index: number) => {
-  if (index > 0) {
-    const step = updatedTestSteps.value.splice(index, 1)[0];
-    updatedTestSteps.value.splice(index - 1, 0, step);
-  }
-};
-
-const moveStepDown = (index: number) => {
-  if (index < updatedTestSteps.value.length - 1) {
-    const step = updatedTestSteps.value.splice(index, 1)[0];
-    updatedTestSteps.value.splice(index + 1, 0, step);
-  }
-};
-
-const deleteStep = (index: number) => {
-  if (updatedTestSteps.value.length > 1) {
-    updatedTestSteps.value.splice(index, 1);
-  }
-};
 
 const updateTestCase = async () => {
   try {
@@ -236,9 +188,9 @@ const updateTestCase = async () => {
       mutateOnCreateTestSteps({
         testCaseId: testCaseId,
         steps: updatedTestSteps.value.map((step, index) => ({
-          action: step.action,
-          expected_result: step.expectedResult,
-          order: index + 1
+          action: step.action ?? '',
+          expectedResult: step.expectedResult ?? '',
+          order: index + 1,
         }))
       });
     }

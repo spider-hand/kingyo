@@ -7,7 +7,7 @@
       <FormItem class="w-full gap-1">
         <FormLabel class="text-xs text-muted-foreground">Title</FormLabel>
         <FormControl class="w-full">
-          <Input class="w-full" type="text" placeholder="Title" max="100" v-bind="componentField" />
+          <Input class="w-full" type="text" placeholder="Test Plan Title" default-value="New Test Plan" max="100" v-bind="componentField" />
         </FormControl>
         <FormMessage />
       </FormItem>
