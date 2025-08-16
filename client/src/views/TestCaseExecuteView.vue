@@ -3,7 +3,7 @@
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
       <TitleComponent :title="testCase?.title ?? ''" />
       <Button @click="saveTestResults">
-        <LoaderCircle v-if="isCreatingTestResult || isCreatingTestResultSteps" class="mr-1 animate-spin" />
+        <LoaderCircle v-if="isCreatingTestResult || isCreatingTestResultSteps" class="mr-2 animate-spin" />
         <Save v-else class="mr-2" />
         Save
       </Button>

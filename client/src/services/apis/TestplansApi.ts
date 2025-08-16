@@ -16,6 +16,7 @@
 import * as runtime from '../runtime';
 import type {
   CreateTestplansTestcasesTestresultsTestresultstepsRequestInner,
+  CreateTestplansTestcasesTeststepsRequestInner,
   PaginatedTestCaseList,
   PaginatedTestPlanList,
   PaginatedTestResultList,
@@ -33,6 +34,8 @@ import type {
 import {
     CreateTestplansTestcasesTestresultsTestresultstepsRequestInnerFromJSON,
     CreateTestplansTestcasesTestresultsTestresultstepsRequestInnerToJSON,
+    CreateTestplansTestcasesTeststepsRequestInnerFromJSON,
+    CreateTestplansTestcasesTeststepsRequestInnerToJSON,
     PaginatedTestCaseListFromJSON,
     PaginatedTestCaseListToJSON,
     PaginatedTestPlanListFromJSON,
@@ -81,6 +84,12 @@ export interface CreateTestplansTestcasesTestresultsTestresultstepsRequest {
     testPlanId: number;
     testResultId: number;
     createTestplansTestcasesTestresultsTestresultstepsRequestInner?: Array<CreateTestplansTestcasesTestresultsTestresultstepsRequestInner>;
+}
+
+export interface CreateTestplansTestcasesTeststepsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    createTestplansTestcasesTeststepsRequestInner?: Array<CreateTestplansTestcasesTeststepsRequestInner>;
 }
 
 export interface DestroyTestplansRequest {
@@ -404,6 +413,57 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async createTestplansTestcasesTestresultsTestresultsteps(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStep>> {
         const response = await this.createTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Create multiple test steps at once. Replaces all existing test steps for the given test case. Expects an array of test step objects in the request data.
+     */
+    async createTestplansTestcasesTeststepsRaw(requestParameters: CreateTestplansTestcasesTeststepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestStep>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling createTestplansTestcasesTeststeps().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling createTestplansTestcasesTeststeps().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststeps/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['createTestplansTestcasesTeststepsRequestInner']!.map(CreateTestplansTestcasesTeststepsRequestInnerToJSON),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestStepFromJSON));
+    }
+
+    /**
+     * Create multiple test steps at once. Replaces all existing test steps for the given test case. Expects an array of test step objects in the request data.
+     */
+    async createTestplansTestcasesTeststeps(requestParameters: CreateTestplansTestcasesTeststepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestStep>> {
+        const response = await this.createTestplansTestcasesTeststepsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

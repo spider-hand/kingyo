@@ -2,7 +2,7 @@
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
       <TitleComponent :title="testPlan?.title ?? ''" />
-      <Button v-show="selectedTab === 'define'" @click="$router.push({ name: 'test-case-define' })">
+      <Button v-show="selectedTab === 'define'" @click="$router.push({ name: 'test-case-add' })">
         <Plus class="mr-2" />
         New test case
       </Button>
@@ -68,26 +68,25 @@
               <ContextMenu v-for="testCase in testCases" :key="testCase.title">
                 <ContextMenuTrigger as-child>
                   <TableRow class="cursor-pointer"
-                    @click="$router.push({ name: 'test-case-define', params: { testPlanId, testCaseId: testCase.id } })">
+                    @click="$router.push({ name: 'test-case-edit', params: { testPlanId, testCaseId: testCase.id } })">
                     <TableCell class="w-[400px] truncate">
                       {{ testCase.title }}
                     </TableCell>
                     <TableCell>
                       <Badge :class="getBadgeStyle(testCase.status!)">{{ snakeToTitle(testCase.status!)
-                        }}
+                      }}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <span class="inline-block w-2 h-2 mr-1 rounded-full border-2"
                         :class="getResultBadge(testCase.latestResult! as ListTestplansTestcasesLatestResultEnum)"></span>{{
-                          snakeToTitle(testCase.latestResult!)
-                        }}
+                          testCase.latestResult ? snakeToTitle(testCase.latestResult) : 'N/A' }}
                     </TableCell>
                     <TableCell>
                       {{ new Date(testCase.updatedAt).toLocaleString() }}
                     </TableCell>
                     <TableCell>
-                      {{ new Date(testCase.executedAt!).toLocaleString() }}
+                      {{ new Date(testCase.executedAt).toLocaleString() }}
                     </TableCell>
                     <TableCell class="text-right">
                       <Button size="icon" variant="ghost"
@@ -98,15 +97,11 @@
                   </TableRow>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
-                  <ContextMenuItem>
+                  <ContextMenuItem
+                    @click="$router.push({ name: 'test-case-edit', params: { testPlanId: testPlanId, testCaseId: testCase.id } })">
                     <Pencil class="mr-2" />
                     Edit
                   </ContextMenuItem>
-                  <ContextMenuItem>
-                    <Copy class="mr-2" />
-                    Clone
-                  </ContextMenuItem>
-                  <ContextMenuSeparator />
                   <ContextMenuItem class="text-red-600">
                     <Trash class="mr-2 text-red-600" />
                     Delete
@@ -404,7 +399,7 @@ const getResultBadge = (result: ListTestplansTestcasesLatestResultEnum) => {
     case ListTestplansTestcasesLatestResultEnum.InProgress:
       return "bg-amber-500 border-amber-200";
     default:
-      return "";
+      return "bg-slate-500 border-slate-200";
   }
 }
 </script>

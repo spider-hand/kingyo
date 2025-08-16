@@ -52,9 +52,22 @@ const router = createRouter({
           },
         },
         {
-          path: '/test-plans/:testPlanId/test-cases/:testCaseId/define',
-          name: 'test-case-define',
-          component: () => import('@/views/TestCaseDefineView.vue'),
+          path: '/test-plans/:testPlanId/test-cases/add',
+          name: 'test-case-add',
+          component: () => import('@/views/TestCaseAddView.vue'),
+          meta: {
+            breadcrumb: [
+              { name: 'Test Plans', path: '/test-plans' },
+              { name: 'Test Cases', path: '/test-plans/:testPlanId/test-cases' },
+              { name: 'Test Case' },
+            ],
+            requiresAuth: true,
+          },
+        },
+        {
+          path: '/test-plans/:testPlanId/test-cases/:testCaseId/edit',
+          name: 'test-case-edit',
+          component: () => import('@/views/TestCaseEditView.vue'),
           meta: {
             breadcrumb: [
               { name: 'Test Plans', path: '/test-plans' },

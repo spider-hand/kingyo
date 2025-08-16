@@ -2,6 +2,7 @@
 /* eslint-disable */
 export * from './BrowserEnum';
 export * from './CreateTestplansTestcasesTestresultsTestresultstepsRequestInner';
+export * from './CreateTestplansTestcasesTeststepsRequestInner';
 export * from './OsEnum';
 export * from './PaginatedTestCaseList';
 export * from './PaginatedTestPlanList';

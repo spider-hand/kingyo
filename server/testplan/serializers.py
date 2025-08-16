@@ -74,6 +74,21 @@ class TestStepSerializer(serializers.ModelSerializer):
         fields = ["id", "case", "order", "action", "expected_result"]
 
 
+class TestStepCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating test steps.
+    The 'case' field will be automatically set from the URL parameter.
+    """
+
+    class Meta:
+        model = TestStep
+        fields = [
+            "order",
+            "action",
+            "expected_result",
+        ]
+
+
 class TestResultStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestResultStep

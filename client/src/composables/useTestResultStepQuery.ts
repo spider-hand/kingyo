@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { TestplansApi, TestResultStepStatusEnum, type TestResultStep } from '@/services'
+import {
+  TestplansApi,
+  TestResultStepStatusEnum,
+  type CreateTestplansTestcasesTestresultsTestresultstepsRequestInner,
+  type TestResultStep,
+} from '@/services'
 import useApi from './useApi'
 
 const useTestResultStepQuery = (testPlanId: number, testCaseId: number, testResultId?: number) => {
@@ -28,14 +33,7 @@ const useTestResultStepQuery = (testPlanId: number, testCaseId: number, testResu
     useMutation({
       mutationFn: async (payload: {
         testResultId: number
-        steps: Array<{
-          step?: number
-          order: number
-          action?: string
-          expectedResult?: string
-          status?: TestResultStepStatusEnum
-          comment?: string
-        }>
+        steps: Array<CreateTestplansTestcasesTestresultsTestresultstepsRequestInner>
       }) => {
         return await testplansApi.createTestplansTestcasesTestresultsTestresultsteps({
           testPlanId: testPlanId,

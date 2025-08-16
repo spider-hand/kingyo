@@ -53,7 +53,11 @@ const useTestCaseQuery = (testPlanId: number, testCaseId?: number) => {
     enabled: !!(testPlanId && testCaseId),
   })
 
-  const { mutate: mutateOnCreateTestCase } = useMutation({
+  const {
+    mutate: mutateOnCreateTestCase,
+    mutateAsync: mutateAsyncOnCreateTestCase,
+    isPending: isCreatingTestCase,
+  } = useMutation({
     mutationFn: async (payload: {
       title: string
       description?: string
@@ -77,7 +81,11 @@ const useTestCaseQuery = (testPlanId: number, testCaseId?: number) => {
     },
   })
 
-  const { mutate: mutateOnUpdateTestCase, isPending: isUpdatingTestCase } = useMutation({
+  const {
+    mutate: mutateOnUpdateTestCase,
+    mutateAsync: mutateAsyncOnUpdateTestCase,
+    isPending: isUpdatingTestCase,
+  } = useMutation({
     mutationFn: async (payload: {
       id: number
       title: string
@@ -134,10 +142,13 @@ const useTestCaseQuery = (testPlanId: number, testCaseId?: number) => {
     latestResult,
     isFetchingTestCases,
     isFetchingTestCase,
+    isCreatingTestCase,
     isUpdatingTestCase,
     isDeletingTestCase,
     mutateOnCreateTestCase,
+    mutateAsyncOnCreateTestCase,
     mutateOnUpdateTestCase,
+    mutateAsyncOnUpdateTestCase,
     mutateOnDeleteTestCase,
   }
 }

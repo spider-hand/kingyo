@@ -734,6 +734,53 @@ paths:
                 items:
                   $ref: '#/components/schemas/TestStep'
           description: ''
+    post:
+      operationId: createTestplansTestcasesTeststeps
+      description: Create multiple test steps at once. Replaces all existing test
+        steps for the given test case. Expects an array of test step objects in the
+        request data.
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  order:
+                    type: integer
+                    minimum: 0
+                    format: int64
+                  action:
+                    type: string
+                  expected_result:
+                    type: string
+                required:
+                - order
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestStep'
+          description: ''
   /api/v1/testplans/{testPlanId}/testresults/:
     get:
       operationId: listTestplansTestresults
