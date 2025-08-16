@@ -189,10 +189,10 @@ const onCancelDeletion = () => {
   selectedTestPlanId.value = null;
 }
 
-const onDeleteTestPlan = async () => {
+const onDeleteTestPlan = () => {
   if (!selectedTestPlanId.value) return;
   try {
-    await mutateOnDeleteTestPlan(selectedTestPlanId.value);
+    mutateOnDeleteTestPlan(selectedTestPlanId.value);
   } catch (error) {
     console.error("Failed to delete test plan:", error);
   } finally {

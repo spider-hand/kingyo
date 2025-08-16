@@ -74,7 +74,7 @@
                     </TableCell>
                     <TableCell>
                       <Badge :class="getBadgeStyle(testCase.status!)">{{ snakeToTitle(testCase.status!)
-                      }}
+                        }}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -102,7 +102,7 @@
                     <Pencil class="mr-2" />
                     Edit
                   </ContextMenuItem>
-                  <ContextMenuItem class="text-red-600">
+                  <ContextMenuItem class="text-red-600" @click="onConfirmDeletion(testCase.id)">
                     <Trash class="mr-2 text-red-600" />
                     Delete
                   </ContextMenuItem>
@@ -238,18 +238,35 @@
         </Pagination>
       </TabsContent>
     </Tabs>
+    <AlertDialog :open="openDeleteDialog">
+      <AlertDialogContent>
+        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This will delete <strong>{{ selectedTestCase?.title }}</strong> and all associated test steps.
+        </AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="onCancelDeletion">Cancel</AlertDialogCancel>
+          <Button variant="destructive" @click="onDeleteTestCase">Delete</Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 import TitleComponent from '@/components/TitleComponent.vue';
+import AlertDialog from '@/components/ui/alert-dialog/AlertDialog.vue';
+import AlertDialogCancel from '@/components/ui/alert-dialog/AlertDialogCancel.vue';
+import AlertDialogContent from '@/components/ui/alert-dialog/AlertDialogContent.vue';
+import AlertDialogDescription from '@/components/ui/alert-dialog/AlertDialogDescription.vue';
+import AlertDialogFooter from '@/components/ui/alert-dialog/AlertDialogFooter.vue';
+import AlertDialogTitle from '@/components/ui/alert-dialog/AlertDialogTitle.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ContextMenu from '@/components/ui/context-menu/ContextMenu.vue';
 import ContextMenuContent from '@/components/ui/context-menu/ContextMenuContent.vue';
 import ContextMenuItem from '@/components/ui/context-menu/ContextMenuItem.vue';
-import ContextMenuSeparator from '@/components/ui/context-menu/ContextMenuSeparator.vue';
 import ContextMenuTrigger from '@/components/ui/context-menu/ContextMenuTrigger.vue';
 import Input from '@/components/ui/input/Input.vue';
 import Pagination from '@/components/ui/pagination/Pagination.vue';
@@ -281,7 +298,7 @@ import useUserQuery from '@/composables/useUserQuery';
 import { TEST_CASE_LATEST_RESULT_OPTIONS, TEST_CASE_RESULT_CONFIGURATION_OPTIONS, TEST_CASE_STATUS_OPTIONS } from '@/consts';
 import { ListTestplansTestcasesLatestResultEnum, ListTestplansTestcasesStatusEnum } from '@/services';
 import { formatConfiguration, snakeToTitle } from '@/utils';
-import { Copy, ListFilter, Pencil, Play, Plus, Trash } from 'lucide-vue-next';
+import { ListFilter, Pencil, Play, Plus, Trash } from 'lucide-vue-next';
 import type { AcceptableValue } from 'reka-ui';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -289,11 +306,17 @@ import { useRoute } from 'vue-router';
 
 const selectedTab = ref<"define" | "execute">('define');
 
+const selectedTestCaseId = ref<number | null>(null);
+const selectedTestCase = computed(() => {
+  return selectedTestCaseId.value ? testCases.value?.find(testCase => testCase.id === selectedTestCaseId.value) : null;
+});
+const openDeleteDialog = ref(false);
+
 const router = useRoute();
 const testPlanId = Number(router.params.testPlanId);
 
 const { testPlan } = useTestPlanQuery(testPlanId);
-const { testCases, count: testCasesCount, page: testCasesPage, title: testCasesTitle, status, latestResult } = useTestCaseQuery(testPlanId);
+const { testCases, count: testCasesCount, page: testCasesPage, title: testCasesTitle, status, latestResult, mutateOnDeleteTestCase } = useTestCaseQuery(testPlanId);
 const { testResults, count: testResultsCount, page: testResultsPage, title: testResultsTitle, result, tester, configuration } = useTestResultQuery(testPlanId);
 
 const { users, isFetchingUsers } = useUserQuery();
@@ -400,6 +423,28 @@ const getResultBadge = (result: ListTestplansTestcasesLatestResultEnum) => {
       return "bg-amber-500 border-amber-200";
     default:
       return "bg-slate-500 border-slate-200";
+  }
+}
+
+const onConfirmDeletion = (id: number) => {
+  openDeleteDialog.value = true;
+  selectedTestCaseId.value = id;
+}
+
+const onCancelDeletion = () => {
+  openDeleteDialog.value = false;
+  selectedTestCaseId.value = null;
+}
+
+const onDeleteTestCase = () => {
+  if (!selectedTestCaseId.value) return;
+  try {
+    mutateOnDeleteTestCase(selectedTestCaseId.value);
+  } catch (error) {
+    console.error("Failed to delete test case:", error);
+  } finally {
+    openDeleteDialog.value = false;
+    selectedTestCaseId.value = null;
   }
 }
 </script>
