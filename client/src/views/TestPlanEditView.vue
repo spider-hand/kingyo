@@ -5,7 +5,8 @@
       <TitleComponent title="Edit Test Plan" />
     </div>
     <FormField v-slot="{ componentField }" name="title" class="flex flex-col w-full">
-      <FormItem class="w-full">
+      <FormItem class="w-full gap-1">
+        <FormLabel class="text-xs text-muted-foreground">Title</FormLabel>
         <FormControl class="w-full">
           <Input class="w-full" type="text" placeholder="Title" max="100" v-bind="componentField" />
         </FormControl>
@@ -14,18 +15,20 @@
     </FormField>
     <FormField v-slot="{ componentField }" name="status" class="flex flex-col w-full align-start">
       <FormItem class="w-full">
-        <Select v-bind="componentField">
-          <SelectTrigger class="w-[180px]">
-            <SelectValue placeholder="Status"></SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem v-for="option in TEST_PLAN_STATUS_OPTIONS" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <SelectWrapperComponent label="Status">
+          <Select v-bind="componentField">
+            <SelectTrigger class="w-[180px]">
+              <SelectValue placeholder="Status"></SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem v-for="option in TEST_PLAN_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </SelectWrapperComponent>
       </FormItem>
     </FormField>
     <div class="flex flex-row items-center justify-end w-full gap-4">
@@ -40,11 +43,13 @@
 </template>
 
 <script setup lang="ts">
+import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 import TitleComponent from '@/components/TitleComponent.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { FormField } from '@/components/ui/form';
 import FormControl from '@/components/ui/form/FormControl.vue';
 import FormItem from '@/components/ui/form/FormItem.vue';
+import FormLabel from '@/components/ui/form/FormLabel.vue';
 import FormMessage from '@/components/ui/form/FormMessage.vue';
 import Input from '@/components/ui/input/Input.vue';
 import Select from '@/components/ui/select/Select.vue';

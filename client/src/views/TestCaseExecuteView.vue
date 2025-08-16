@@ -9,19 +9,21 @@
       </Button>
     </div>
     <div class="flex flex-row items-center w-full">
-      <Select :default-value="configuration" @update:model-value="onConfigurationChange">
-        <SelectTrigger class="w-[240px] mr-2">
-          <SelectValue placeholder="Configuration"></SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem v-for="config in TEST_CASE_RESULT_CONFIGURATION_OPTIONS" :key="config.value"
-              :value="config.value">
-              {{ config.label }}
-            </SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <SelectWrapperComponent label="Configuration">
+        <Select :default-value="configuration" @update:model-value="onConfigurationChange">
+          <SelectTrigger class="w-[240px] mr-2">
+            <SelectValue placeholder="Configuration"></SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem v-for="config in TEST_CASE_RESULT_CONFIGURATION_OPTIONS" :key="config.value"
+                :value="config.value">
+                {{ config.label }}
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </SelectWrapperComponent>
     </div>
     <div class="rounded-md border w-full">
       <Table>
@@ -139,6 +141,7 @@ import SelectItem from '@/components/ui/select/SelectItem.vue';
 import { TEST_CASE_RESULT_CONFIGURATION_OPTIONS } from '@/consts';
 import type { AcceptableValue } from 'reka-ui';
 import { Textarea } from '@/components/ui/textarea';
+import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 
 const route = useRoute();
 const router = useRouter();

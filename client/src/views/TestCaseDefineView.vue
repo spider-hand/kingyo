@@ -8,18 +8,20 @@
       </Button>
     </div>
     <div class="flex flex-row items-center w-full">
-      <Select v-if="!isFetchingTestCase && testCase" :default-value="testCase.status">
-        <SelectTrigger class="w-[180px] mr-2">
-          <SelectValue placeholder="Status"></SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem v-for="status in TEST_CASE_STATUS_OPTIONS" :key="status.value" :value="status.value">
-              {{ status.label }}
-            </SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <SelectWrapperComponent label="Status">
+        <Select v-if="!isFetchingTestCase && testCase" :default-value="testCase.status">
+          <SelectTrigger class="w-[180px] mr-2">
+            <SelectValue placeholder="Status"></SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem v-for="status in TEST_CASE_STATUS_OPTIONS" :key="status.value" :value="status.value">
+                {{ status.label }}
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </SelectWrapperComponent>
     </div>
     <div class="rounded-md border w-full">
       <Table>
@@ -84,6 +86,7 @@
 </template>
 
 <script setup lang="ts">
+import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 import TitleComponent from '@/components/TitleComponent.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ContextMenu from '@/components/ui/context-menu/ContextMenu.vue';

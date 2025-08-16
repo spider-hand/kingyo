@@ -4,7 +4,8 @@
       <TitleComponent title="Add Test Plan" />
     </div>
     <FormField v-slot="{ componentField }" name="title" class="flex flex-col w-full">
-      <FormItem class="w-full">
+      <FormItem class="w-full gap-1">
+        <FormLabel class="text-xs text-muted-foreground">Title</FormLabel>
         <FormControl class="w-full">
           <Input class="w-full" type="text" placeholder="Title" max="100" v-bind="componentField" />
         </FormControl>
@@ -28,6 +29,7 @@ import Button from '@/components/ui/button/Button.vue';
 import { FormField } from '@/components/ui/form';
 import FormControl from '@/components/ui/form/FormControl.vue';
 import FormItem from '@/components/ui/form/FormItem.vue';
+import FormLabel from '@/components/ui/form/FormLabel.vue';
 import FormMessage from '@/components/ui/form/FormMessage.vue';
 import Input from '@/components/ui/input/Input.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';

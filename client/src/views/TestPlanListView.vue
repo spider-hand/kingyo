@@ -7,25 +7,27 @@
         New test plan
       </Button>
     </div>
-    <div class="flex flex-row items-center justify-between w-full">
+    <div class="flex flex-row items-end justify-between w-full">
       <div class="relative w-full mr-4">
         <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
           <ListFilter class="size-6 text-muted-foreground" />
         </div>
         <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTitleChange" />
       </div>
-      <Select default-value="all" @update:model-value="onStatusChange">
-        <SelectTrigger class="w-[180px]">
-          <SelectValue placeholder="Status"></SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <SelectWrapperComponent label="Status">
+        <Select default-value="all" @update:model-value="onStatusChange">
+          <SelectTrigger class="w-[180px]">
+            <SelectValue placeholder="Status"></SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </SelectWrapperComponent>
     </div>
     <div class="rounded-md border w-full">
       <Table>
@@ -144,6 +146,7 @@ import AlertDialogFooter from '@/components/ui/alert-dialog/AlertDialogFooter.vu
 import AlertDialogCancel from '@/components/ui/alert-dialog/AlertDialogCancel.vue';
 import { computed, ref } from 'vue';
 import { TEST_PLAN_STATUS_OPTIONS } from '@/consts';
+import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 
 
 const selectedTestPlanId = ref<number | null>(null);

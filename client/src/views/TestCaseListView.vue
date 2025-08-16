@@ -13,37 +13,41 @@
         <TabsTrigger value="execute">History</TabsTrigger>
       </TabsList>
       <TabsContent class="flex flex-col items-center justify-center w-full gap-4 py-8" value="define">
-        <div class="flex flex-row items-center justify-between w-full">
+        <div class="flex flex-row items-end justify-between w-full">
           <div class="relative w-full mr-4">
             <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
               <ListFilter class="size-6 text-muted-foreground" />
             </div>
             <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestCaseTitleChange" />
           </div>
-          <Select :default-value="status" @update:model-value="onStatusChange">
-            <SelectTrigger class="w-[180px] mr-2">
-              <SelectValue placeholder="Status"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Select :default-value="latestResult" @update:model-value="onLatestOutcomeChange">
-            <SelectTrigger class="w-[180px]">
-              <SelectValue placeholder="Latest Outcome"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem v-for="option in latestResultOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <SelectWrapperComponent label="Status">
+            <Select :default-value="status" @update:model-value="onStatusChange">
+              <SelectTrigger class="w-[180px] mr-2">
+                <SelectValue placeholder="Status"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </SelectWrapperComponent>
+          <SelectWrapperComponent label="Latest Outcome">
+            <Select :default-value="latestResult" @update:model-value="onLatestOutcomeChange">
+              <SelectTrigger class="w-[180px]">
+                <SelectValue placeholder="Latest Outcome"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem v-for="option in latestResultOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </SelectWrapperComponent>
         </div>
         <div class="rounded-md border w-full">
           <Table>
@@ -129,49 +133,55 @@
         </Pagination>
       </TabsContent>
       <TabsContent class="flex flex-col items-center justify-center w-full gap-4 py-8" value="execute">
-        <div class="flex flex-row items-center justify-between w-full">
+        <div class="flex flex-row items-end justify-between w-full">
           <div class="relative w-full mr-4">
             <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
               <ListFilter class="size-6 text-muted-foreground" />
             </div>
             <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestResultTitleChange" />
           </div>
-          <Select :default-value="result" @update:model-value="onTestResultOutcomeChange">
-            <SelectTrigger class="w-[180px] mr-2">
-              <SelectValue placeholder="Outcome"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem v-for="option in latestResultOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Select :default-value="tester" @update:model-value="onTestResultTesterChange">
-            <SelectTrigger class="w-[180px] mr-2">
-              <SelectValue placeholder="Tester"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem v-for="option in testerOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Select :default-value="configuration" @update:model-value="onTestResultConfigurationChange">
-            <SelectTrigger class="w-[180px]">
-              <SelectValue placeholder="Configuration"></SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem v-for="option in configurationOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <SelectWrapperComponent label="Outcome">
+            <Select :default-value="result" @update:model-value="onTestResultOutcomeChange">
+              <SelectTrigger class="w-[180px] mr-2">
+                <SelectValue placeholder="Outcome"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem v-for="option in latestResultOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </SelectWrapperComponent>
+          <SelectWrapperComponent label="Tester">
+            <Select :default-value="tester" @update:model-value="onTestResultTesterChange">
+              <SelectTrigger class="w-[180px] mr-2">
+                <SelectValue placeholder="Tester"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem v-for="option in testerOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </SelectWrapperComponent>
+          <SelectWrapperComponent label="Configuration">
+            <Select :default-value="configuration" @update:model-value="onTestResultConfigurationChange">
+              <SelectTrigger class="w-[180px]">
+                <SelectValue placeholder="Configuration"></SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem v-for="option in configurationOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </SelectWrapperComponent>
         </div>
         <div class="rounded-md border w-full">
           <Table>
@@ -237,6 +247,7 @@
 </template>
 
 <script setup lang="ts">
+import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 import TitleComponent from '@/components/TitleComponent.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
