@@ -1,42 +1,32 @@
-# Pull base image
-FROM python:3.13
+# @see: https://docs.astral.sh/uv/guides/integration/docker/
+# @see: https://github.com/astral-sh/uv-docker-example/blob/main/multistage.Dockerfile
 
-# Set the working directory
+# Build the application in /app directory
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0
+
 WORKDIR /app
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never \
-    UV_PROJECT_ENVIRONMENT=/app/.venv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends netcat-traditional
+ADD . /app
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /uvx /bin/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
-# Since there's no point in shipping lock files, we move them
-# into a directory that is NOT copied into the runtime image.
-# The trailing slash makes COPY create `/_lock/` automagically.
-COPY pyproject.toml uv.lock /_lock/
+# Use a final image without uv
+FROM python:3.13-slim-bookworm
 
-# Synchronize dependencies.
-# This layer is cached until uv.lock or pyproject.toml change.
-RUN --mount=type=cache,target=/root/.cache \
-    cd /_lock && \
-    uv sync \
-    --frozen \
-    --no-install-project
+COPY --from=builder --chown=app:app /app /app
 
-# Copy entrypoint.sh
-COPY ./entrypoint.sh .
-RUN sed -i "s/\r$//g" /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Copy entrypoint.sh
-COPY . .
+WORKDIR /app
 
-# Run entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

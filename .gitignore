@@ -2,3 +2,5 @@
 !.vscode/extensions.json
 
 .DS_Store
+
+.env
