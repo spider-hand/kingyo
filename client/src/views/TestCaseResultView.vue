@@ -1,22 +1,25 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
-    <div class="flex flex-col w-full gap-4">
-      <div class="flex flex-row items-center gap-2">
-        <CircleCheck v-if="testResult?.result === 'pass'" class="size-4 text-green-600"></CircleCheck>
-        <CircleX v-else-if="testResult?.result === 'fail'" class="size-4 text-red-600"></CircleX>
-        <CircleMinus v-else class="size-4 text-muted-foreground"></CircleMinus>
-        <TitleComponent :title="testCase?.title ?? ''" />
+    <div class="flex flex-row justify-between w-full">
+      <div class="flex flex-col w-full gap-4">
+        <div class="flex flex-row items-center gap-2">
+          <CircleCheck v-if="testResult?.result === 'pass'" class="size-4 text-green-600"></CircleCheck>
+          <CircleX v-else-if="testResult?.result === 'fail'" class="size-4 text-red-600"></CircleX>
+          <CircleMinus v-else class="size-4 text-muted-foreground"></CircleMinus>
+          <TitleComponent :title="testCase?.title ?? ''" />
+        </div>
+        <div class="flex flex-col w-full gap-2">
+          <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span>{{ testPlan?.title }}</span></p>
+          <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span>{{ testResult?.testerUsername
+          }}</span></p>
+          <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span>{{
+            formatConfiguration(testResult?._configuration ?? '') }}</span>
+          </p>
+          <p class="text-sm"><span class="text-muted-foreground">Timestamp</span> <span>{{ new
+            Date(testResult?.executedAt ?? '').toLocaleString() }}</span></p>
+        </div>
       </div>
-      <div class="flex flex-col w-full gap-2">
-        <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span>{{ testPlan?.title }}</span></p>
-        <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span>{{ testResult?.testerUsername
-            }}</span></p>
-        <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span>{{
-          formatConfiguration(testResult?._configuration ?? '') }}</span>
-        </p>
-        <p class="text-sm"><span class="text-muted-foreground">Timestamp</span> <span>{{ new
-          Date(testResult?.executedAt ?? '').toLocaleString() }}</span></p>
-      </div>
+      <DoughnutChart :data="chartData" :size="200" />
     </div>
     <div class="rounded-md border w-full">
       <Table>
@@ -71,6 +74,7 @@
 
 <script setup lang="ts">
 import TitleComponent from '@/components/TitleComponent.vue';
+import DoughnutChart from '@/components/DoughnutChart.vue';
 import Table from '@/components/ui/table/Table.vue';
 import TableBody from '@/components/ui/table/TableBody.vue';
 import TableCell from '@/components/ui/table/TableCell.vue';
@@ -84,6 +88,8 @@ import useTestResultStepQuery from '@/composables/useTestResultStepQuery';
 import { formatConfiguration } from '@/utils';
 import { CircleCheck, CircleMinus, CircleX } from 'lucide-vue-next';
 import { useRoute } from 'vue-router';
+import { computed } from 'vue';
+
 
 const router = useRoute();
 const testPlanId = Number(router.params.testPlanId);
@@ -94,4 +100,53 @@ const { testPlan } = useTestPlanQuery(testPlanId);
 const { testCase } = useTestCaseQuery(testPlanId, testCaseId);
 const { testResult } = useTestResultQuery(testPlanId, testCaseId, testResultId);
 const { testResultSteps } = useTestResultStepQuery(testPlanId, testCaseId, testResultId);
+
+
+const stepCounts = computed(() => {
+  if (!testResultSteps.value) {
+    return {
+      pass: 0,
+      fail: 0,
+      skip: 0,
+      total: 0,
+    };
+  }
+
+  const counts = {
+    pass: 0,
+    fail: 0,
+    skip: 0,
+    total: testResultSteps.value.length,
+  };
+
+  testResultSteps.value.forEach(step => {
+    if (step.status === 'pass') {
+      counts.pass++;
+    } else if (step.status === 'fail') {
+      counts.fail++;
+    } else if (step.status === 'skip') {
+      counts.skip++;
+    }
+  });
+
+  return counts;
+});
+
+const chartData = computed(() => [
+  {
+    label: 'Passed',
+    value: stepCounts.value.pass,
+    color: 'oklch(72.3% 0.219 149.579)', // green-500
+  },
+  {
+    label: 'Failed',
+    value: stepCounts.value.fail,
+    color: 'oklch(63.7% 0.237 25.331)', // red-500
+  },
+  {
+    label: 'Skipped',
+    value: stepCounts.value.skip,
+    color: 'oklch(70.4% 0.04 256.788)', // slate-400
+  },
+]);
 </script>
