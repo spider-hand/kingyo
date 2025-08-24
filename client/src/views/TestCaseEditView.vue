@@ -2,8 +2,8 @@
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-end w-full">
       <Button @click="updateTestCase" :disabled="isUpdatingTestCase || isCreatingTestSteps">
-        <LoaderCircle v-if="isUpdatingTestCase || isCreatingTestSteps" class="mr-2 animate-spin" />
-        <Save class="mr-2" />
+        <LoaderCircle v-if="isUpdatingTestCase || isCreatingTestSteps" class="animate-spin" />
+        <Save />
         Save Changes
       </Button>
     </div>
@@ -44,69 +44,99 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <ContextMenu v-for="(step, index) in updatedTestSteps" :key="index">
-            <ContextMenuTrigger as-child>
-              <TableRow v-if="selectedStepIndex !== index" class="cursor-pointer" @click="selectStep(index)">
-                <TableCell>
-                  {{ index + 1 }}
-                </TableCell>
-                <TableCell class="whitespace-pre-line align-top">
-                  {{ step.action }}
-                </TableCell>
-                <TableCell class="whitespace-pre-line align-top">
-                  {{ step.expectedResult }}
-                </TableCell>
-                <TableCell class="text-right">
-                  <Button variant="ghost" size="icon">
-                    <Paperclip class="size-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-              <TableRow v-else @focusout="onFocusOutTableRow">
-                <TableCell>
-                  {{ index + 1 }}
-                </TableCell>
-                <TableCell>
-                  <Textarea v-model="step.action" class="w-full" placeholder="Action" />
-                </TableCell>
-                <TableCell>
-                  <Textarea v-model="step.expectedResult" class="w-full" placeholder="Expected Result" />
-                </TableCell>
-                <TableCell class="text-right">
-                  <Button variant="ghost" size="icon">
-                    <Paperclip class="size-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem @click="insertStep(index)">
-                <CornerDownRight class="size-4" />
-                Insert step
-              </ContextMenuItem>
-              <ContextMenuItem @click="moveStepUp(index)">
-                <MoveUp class="size-4" />
-                Move current step up
-              </ContextMenuItem>
-              <ContextMenuItem @click="moveStepDown(index)">
-                <MoveDown class="size-4" />
-                Move current step down
-              </ContextMenuItem>
-              <ContextMenuSeparator />
-              <ContextMenuItem class="text-red-600" @click="deleteStep(index)">
-                <Trash class="size-4 text-red-600" />
-                Delete step
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
+          <template v-for="(step, index) in updatedTestSteps" :key="index">
+            <ContextMenu>
+              <ContextMenuTrigger as-child>
+                <TableRow v-if="selectedStepIndex !== index" class="cursor-pointer" @click="selectStep(index)">
+                  <TableCell>
+                    {{ index + 1 }}
+                  </TableCell>
+                  <TableCell class="whitespace-pre-line align-top">
+                    {{ step.action }}
+                  </TableCell>
+                  <TableCell class="whitespace-pre-line align-top">
+                    {{ step.expectedResult }}
+                  </TableCell>
+                  <TableCell class="text-right">
+                    <Button variant="ghost" size="icon" @click.stop="openFileUploadDialog(index)">
+                      <Paperclip class="size-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                <TableRow v-else @focusout="onFocusOutTableRow">
+                  <TableCell>
+                    {{ index + 1 }}
+                  </TableCell>
+                  <TableCell>
+                    <Textarea v-model="step.action" class="w-full" placeholder="Action" />
+                  </TableCell>
+                  <TableCell>
+                    <Textarea v-model="step.expectedResult" class="w-full" placeholder="Expected Result" />
+                  </TableCell>
+                  <TableCell class="text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <span v-if="updatedTestStepsAttachments[index]?.length" class="text-xs text-muted-foreground">
+                        {{ updatedTestStepsAttachments[index].length }}
+                      </span>
+                      <Button variant="ghost" size="icon" @click="openFileUploadDialog(index)">
+                        <Paperclip class="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem @click="insertStep(index)">
+                  <CornerDownRight class="size-4" />
+                  Insert step
+                </ContextMenuItem>
+                <ContextMenuItem @click="moveStepUp(index)">
+                  <MoveUp class="size-4" />
+                  Move current step up
+                </ContextMenuItem>
+                <ContextMenuItem @click="moveStepDown(index)">
+                  <MoveDown class="size-4" />
+                  Move current step down
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem class="text-red-600" @click="deleteStep(index)">
+                  <Trash class="size-4 text-red-600" />
+                  Delete step
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+            <TableRow v-if="updatedTestStepsAttachments[index]?.length">
+              <TableCell colspan="4" class="py-2">
+                <div class="space-y-2">
+                  <div class="flex flex-wrap gap-2">
+                    <div v-for="(attachment, attachmentIndex) in updatedTestStepsAttachments[index]"
+                      :key="attachmentIndex" class="flex items-center gap-2 p-2 bg-muted rounded border">
+                      <Paperclip class="h-4 w-4 text-muted-foreground" />
+                      <span class="text-sm truncate max-w-48">{{ attachment.name }}</span>
+                      <span class="text-xs text-muted-foreground">
+                        ({{ (attachment.size / 1024).toFixed(1) }}KB)
+                      </span>
+                      <Button variant="ghost" size="sm" @click="removeAttachment(index, attachmentIndex)"
+                        class="h-6 w-6 p-0 text-muted-foreground">
+                        <X class="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </TableCell>
+            </TableRow>
+          </template>
         </TableBody>
       </Table>
     </div>
+    <FileUploadDialog :open="showFileUploadDialog" :step-number="selectedStepIndex! + 1"
+      @open="showFileUploadDialog = $event" @upload-files="uploadFiles" />
   </div>
 </template>
 
 <script setup lang="ts">
 import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
+import FileUploadDialog from '@/components/FileUploadDialog.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ContextMenu from '@/components/ui/context-menu/ContextMenu.vue';
 import ContextMenuContent from '@/components/ui/context-menu/ContextMenuContent.vue';
@@ -131,9 +161,10 @@ import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestStepQuery from '@/composables/useTestStepQuery';
 import useTestStepEditor from '@/composables/useTestStepEditor';
 import { TEST_CASE_STATUS_OPTIONS } from '@/consts';
-import { CornerDownRight, LoaderCircle, MoveDown, MoveUp, Paperclip, Save, Trash } from 'lucide-vue-next';
+import { CornerDownRight, LoaderCircle, MoveDown, MoveUp, Paperclip, Save, Trash, X } from 'lucide-vue-next';
 import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -149,6 +180,8 @@ const {
   testCaseStatus: updatedTestCaseStatus,
   selectedStepIndex,
   testSteps: updatedTestSteps,
+  testStepsAttachments: updatedTestStepsAttachments,
+  showFileUploadDialog,
   onTestCaseStatusChange,
   selectStep,
   onFocusOutTableRow,
@@ -156,7 +189,11 @@ const {
   moveStepUp,
   moveStepDown,
   deleteStep,
+  openFileUploadDialog,
+  uploadFiles,
+  removeAttachment,
 } = useTestStepEditor()
+
 
 watch(testCase, (newTestCase) => {
   if (newTestCase) {
@@ -172,6 +209,7 @@ watch(testSteps, (newTestSteps) => {
       action: step.action ?? '',
       expectedResult: step.expectedResult ?? '',
     }))
+    // TODO: Update attachements
   }
 }, { immediate: true });
 
@@ -194,6 +232,8 @@ const updateTestCase = async () => {
         }))
       });
     }
+
+    // TODO:
 
     router.push({
       name: 'test-case-list',

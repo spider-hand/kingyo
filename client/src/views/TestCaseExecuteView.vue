@@ -43,7 +43,7 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <template v-for="step in testSteps" :key="step.id">
+          <template v-for="(step, index) in testSteps" :key="step.id">
             <ContextMenu>
               <ContextMenuTrigger as-child>
                 <TableRow class="cursor-pointer" :data-step-id="step.id">
@@ -85,21 +85,41 @@
                   <MessageSquare class="size-4" />
                   Add comment
                 </ContextMenuItem>
-                <ContextMenuItem>
+                <ContextMenuItem @click="openFileUploadDialog(index)">
                   <Paperclip class="size-4" />
                   Add attachment
                 </ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
-
-            <TableRow v-if="commentingStepId === step.id || stepResults[step.id]?.comment?.trim()">
+            <TableRow
+              v-if="commentingStepId === step.id || stepResults[step.id]?.comment?.trim() || stepResults[step.id]?.attachments?.length">
               <TableCell colspan="5" class="py-4">
-                <Textarea v-if="commentingStepId === step.id" v-model="stepResults[step.id].comment"
-                  :placeholder="`Add your comment for step ${step.order}`" class="text-sm"
-                  @blur="hideCommentArea(step.id)"></Textarea>
-                <div v-else class="whitespace-pre-line align-top cursor-pointer" role="button"
-                  @click="showCommentArea(step.id)">
-                  {{ stepResults[step.id]?.comment }}
+                <div class="flex flex-col gap-2">
+                  <div v-if="commentingStepId === step.id || stepResults[step.id]?.comment?.trim()">
+                    <Textarea v-if="commentingStepId === step.id" v-model="stepResults[step.id].comment"
+                      :placeholder="`Add your comment for step ${step.order}`" class="text-sm"
+                      @blur="hideCommentArea(step.id)"></Textarea>
+                    <div v-else class="whitespace-pre-line align-top cursor-pointer" role="button"
+                      @click="showCommentArea(step.id)">
+                      {{ stepResults[step.id]?.comment }}
+                    </div>
+                  </div>
+                  <div v-if="stepResults[step.id]?.attachments?.length">
+                    <div class="flex flex-row flex-wrap gap-2">
+                      <div v-for="(attachment, attachmentIndex) in stepResults[step.id].attachments"
+                        :key="attachmentIndex" class="flex items-center gap-2 p-2 bg-muted rounded border">
+                        <Paperclip class="h-4 w-4 text-muted-foreground" />
+                        <span class="text-sm truncate max-w-48">{{ attachment.name }}</span>
+                        <span class="text-xs text-muted-foreground">
+                          ({{ (attachment.size / 1024).toFixed(1) }}KB)
+                        </span>
+                        <Button variant="ghost" size="sm" @click="removeAttachment(step.id, attachmentIndex)"
+                          class="h-6 w-6 p-0 text-muted-foreground">
+                          <X class="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </TableCell>
             </TableRow>
@@ -107,6 +127,8 @@
         </TableBody>
       </Table>
     </div>
+    <FileUploadDialog :open="showFileUploadDialog" :step-number="selectedStep! + 1"
+      @open="showFileUploadDialog = $event" @upload-files="uploadFiles" />
   </div>
 </template>
 
@@ -128,7 +150,7 @@ import useTestResultQuery from '@/composables/useTestResultQuery';
 import useTestResultStepQuery from '@/composables/useTestResultStepQuery';
 import useTestStepQuery from '@/composables/useTestStepQuery';
 import useUserQuery from '@/composables/useUserQuery';
-import { CircleCheck, CircleX, LoaderCircle, MessageSquare, Paperclip, Save } from 'lucide-vue-next';
+import { CircleCheck, CircleX, LoaderCircle, MessageSquare, Paperclip, Save, X } from 'lucide-vue-next';
 import { useRoute, useRouter } from 'vue-router';
 import { ref, computed, nextTick } from 'vue';
 import type { BrowserEnum, OsEnum, ResultEnum, TestResultStepStatusEnum } from '@/services';
@@ -142,6 +164,7 @@ import { TEST_CASE_RESULT_CONFIGURATION_OPTIONS } from '@/consts';
 import type { AcceptableValue } from 'reka-ui';
 import { Textarea } from '@/components/ui/textarea';
 import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
+import FileUploadDialog from '@/components/FileUploadDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -153,9 +176,11 @@ const { mutateOnCreateTestResultAsync, isCreatingTestResult } = useTestResultQue
 const { mutateOnCreateTestResultSteps, isCreatingTestResultSteps } = useTestResultStepQuery(testPlanId, testCaseId);
 const { currentUser } = useUserQuery();
 
-const stepResults = ref<Record<number, { status: TestResultStepStatusEnum; comment: string }>>({});
+const stepResults = ref<Record<number, { status: TestResultStepStatusEnum; comment: string; attachments: File[] }>>({});
 const configuration = ref<string>(TEST_CASE_RESULT_CONFIGURATION_OPTIONS[0].value);
 const commentingStepId = ref<number | null>(null);
+const showFileUploadDialog = ref(false);
+const selectedStep = ref<number | null>(null);
 
 const overallResult = computed<ResultEnum>(() => {
   const totalSteps = testSteps.value?.length ?? 0;
@@ -167,7 +192,7 @@ const overallResult = computed<ResultEnum>(() => {
 
 const updateStepStatus = (stepId: number, status: TestResultStepStatusEnum) => {
   if (!stepResults.value[stepId]) {
-    stepResults.value[stepId] = { status, comment: '' };
+    stepResults.value[stepId] = { status, comment: '', attachments: [] };
   } else {
     stepResults.value[stepId].status = status;
   }
@@ -181,7 +206,7 @@ const showCommentArea = async (stepId: number) => {
   commentingStepId.value = stepId;
 
   if (!stepResults.value[stepId]) {
-    stepResults.value[stepId] = { status: 'skip', comment: '' };
+    stepResults.value[stepId] = { status: 'skip', comment: '', attachments: [] };
   }
 
   // Focus on the textarea after it's rendered
@@ -198,6 +223,31 @@ const hideCommentArea = (stepId: number) => {
     commentingStepId.value = null
   }
 };
+
+const openFileUploadDialog = (index: number) => {
+  const stepId = testSteps.value?.[index]?.id;
+  if (stepId && !stepResults.value[stepId]) {
+    stepResults.value[stepId] = { status: 'skip', comment: '', attachments: [] };
+  }
+  selectedStep.value = index
+  showFileUploadDialog.value = true
+}
+
+const uploadFiles = (files: File[]) => {
+  if (selectedStep.value !== null && testSteps.value) {
+    const stepId = testSteps.value[selectedStep.value].id;
+    if (!stepResults.value[stepId]) {
+      stepResults.value[stepId] = { status: 'skip', comment: '', attachments: [] };
+    }
+    stepResults.value[stepId].attachments.push(...files);
+  }
+}
+
+const removeAttachment = (stepId: number, attachmentIndex: number) => {
+  if (stepResults.value[stepId]) {
+    stepResults.value[stepId].attachments.splice(attachmentIndex, 1);
+  }
+}
 
 const onConfigurationChange = (value: AcceptableValue) => {
   configuration.value = value as string;
