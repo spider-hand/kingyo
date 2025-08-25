@@ -134,6 +134,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Media files (User uploaded content)
+# https://docs.djangoproject.com/en/5.2/topics/files/
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Storage
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+}
+
+# MinIO
+AWS_S3_ACCESS_KEY_ID = env.str("MINIO_ROOT_USER", default="minio")
+AWS_S3_SECRET_ACCESS_KEY = env.str("MINIO_ROOT_PASSWORD", default="minio123")
+AWS_STORAGE_BUCKET_NAME = env.str("MINIO_BUCKET_NAME", default="kingyo-storage")
+
+# Internal endpoint for Django to upload files
+AWS_S3_ENDPOINT_URL = env.str("MINIO_ENDPOINT_URL", default="http://storage:9000")
+
+# External endpoint for client-side access (used in URL generation)
+AWS_S3_CUSTOM_DOMAIN = env.str("MINIO_EXTERNAL_ENDPOINT", default="localhost:9000")
+AWS_S3_URL_PROTOCOL = env.str("MINIO_URL_PROTOCOL", default="https:")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

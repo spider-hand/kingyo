@@ -88,7 +88,7 @@ class TestStep(models.Model):
         ]
 
     def __str__(self):
-        return f"Step {self.order} for {self.case.name}"
+        return f"Step {self.order} for {self.case.title}"
 
 
 class TestStepAttachment(models.Model):

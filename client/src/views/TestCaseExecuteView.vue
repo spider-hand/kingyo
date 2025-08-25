@@ -3,7 +3,7 @@
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
       <TitleComponent :title="testCase?.title ?? ''" />
       <Button @click="saveTestResults">
-        <LoaderCircle v-if="isCreatingTestResult || isCreatingTestResultSteps" class="mr-2 animate-spin" />
+        <LoaderCircle v-if="isCreatingTestResult || isCreatingTestResultSteps || isCreatingTestResultStepAttachments" class="mr-2 animate-spin" />
         <Save v-else class="mr-2" />
         Save
       </Button>
@@ -148,6 +148,7 @@ import TableRow from '@/components/ui/table/TableRow.vue';
 import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestResultQuery from '@/composables/useTestResultQuery';
 import useTestResultStepQuery from '@/composables/useTestResultStepQuery';
+import useTestResultStepAttachmentQuery from '@/composables/useTestResultStepAttachmentQuery';
 import useTestStepQuery from '@/composables/useTestStepQuery';
 import useUserQuery from '@/composables/useUserQuery';
 import { CircleCheck, CircleX, LoaderCircle, MessageSquare, Paperclip, Save, X } from 'lucide-vue-next';
@@ -173,7 +174,8 @@ const testCaseId = Number(route.params.testCaseId);
 const { testCase } = useTestCaseQuery(testPlanId, testCaseId);
 const { testSteps } = useTestStepQuery(testPlanId, testCaseId);
 const { mutateOnCreateTestResultAsync, isCreatingTestResult } = useTestResultQuery(testPlanId, testCaseId);
-const { mutateOnCreateTestResultSteps, isCreatingTestResultSteps } = useTestResultStepQuery(testPlanId, testCaseId);
+const { mutateAsyncOnCreateTestResultSteps, isCreatingTestResultSteps } = useTestResultStepQuery(testPlanId, testCaseId);
+const { mutateOnCreateTestResultStepAttachments, isCreatingTestResultStepAttachments } = useTestResultStepAttachmentQuery(testPlanId, testCaseId);
 const { currentUser } = useUserQuery();
 
 const stepResults = ref<Record<number, { status: TestResultStepStatusEnum; comment: string; attachments: File[] }>>({});
@@ -280,10 +282,34 @@ const saveTestResults = async () => {
           comment: stepResults.value[step.id]?.comment ?? '',
         }));
 
-      mutateOnCreateTestResultSteps({
+      await mutateAsyncOnCreateTestResultSteps({
         testResultId: testResult.id,
         steps: stepsToCreate,
       });
+
+      // Create attachments if any exist
+      const attachmentsToCreate = [];
+      for (const [stepIdStr, stepResult] of Object.entries(stepResults.value)) {
+        if (stepResult.attachments?.length > 0) {
+          const step = testSteps.value.find(s => s.id === Number(stepIdStr));
+          if (step) {
+            for (const attachment of stepResult.attachments) {
+              attachmentsToCreate.push({
+                result_step: step.order,
+                file: attachment,
+              });
+            }
+          }
+        }
+      }
+
+      if (attachmentsToCreate.length > 0) {
+        mutateOnCreateTestResultStepAttachments({
+          testCaseId: testCaseId,
+          testResultId: testResult.id,
+          attachments: attachmentsToCreate
+        });
+      }
     }
 
     router.push({

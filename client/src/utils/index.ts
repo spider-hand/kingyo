@@ -31,3 +31,7 @@ export const formatConfiguration = (str: string): string => {
 
   return `${formattedBrowser} on ${formattedOs}`
 }
+
+export const getAttachmentFileName = (filePath: string) => {
+  return filePath.split('?')[0].split('/').pop() || 'unknown'
+}

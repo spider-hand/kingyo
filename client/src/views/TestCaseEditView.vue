@@ -75,8 +75,9 @@
                   </TableCell>
                   <TableCell class="text-right">
                     <div class="flex items-center justify-end gap-2">
-                      <span v-if="updatedTestStepsAttachments[index]?.length" class="text-xs text-muted-foreground">
-                        {{ updatedTestStepsAttachments[index].length }}
+                      <span v-if="updatedTestStepsAttachments[index]?.attachments.length"
+                        class="text-xs text-muted-foreground">
+                        {{ updatedTestStepsAttachments[index].attachments.length }}
                       </span>
                       <Button variant="ghost" size="icon" @click="openFileUploadDialog(index)">
                         <Paperclip class="size-4" />
@@ -99,17 +100,18 @@
                   Move current step down
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem class="text-red-600" @click="deleteStep(index)">
+                <ContextMenuItem class="text-red-600" @click="deleteStep(index)"
+                  :disabled="updatedTestSteps.length <= 1">
                   <Trash class="size-4 text-red-600" />
                   Delete step
                 </ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
-            <TableRow v-if="updatedTestStepsAttachments[index]?.length">
+            <TableRow v-if="updatedTestStepsAttachments[index]?.attachments.length">
               <TableCell colspan="4" class="py-2">
                 <div class="space-y-2">
                   <div class="flex flex-wrap gap-2">
-                    <div v-for="(attachment, attachmentIndex) in updatedTestStepsAttachments[index]"
+                    <div v-for="(attachment, attachmentIndex) in updatedTestStepsAttachments[index].attachments"
                       :key="attachmentIndex" class="flex items-center gap-2 p-2 bg-muted rounded border">
                       <Paperclip class="h-4 w-4 text-muted-foreground" />
                       <span class="text-sm truncate max-w-48">{{ attachment.name }}</span>
@@ -164,6 +166,10 @@ import { TEST_CASE_STATUS_OPTIONS } from '@/consts';
 import { CornerDownRight, LoaderCircle, MoveDown, MoveUp, Paperclip, Save, Trash, X } from 'lucide-vue-next';
 import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import useTestStepAttachmentQuery from '@/composables/useTestStepAttachmentQuery';
+import useApi from '@/composables/useApi';
+import { TestplansApi } from '@/services';
+import { getAttachmentFileName } from '@/utils';
 
 
 const route = useRoute();
@@ -171,8 +177,11 @@ const router = useRouter();
 const testPlanId = Number(route.params.testPlanId);
 const testCaseId = Number(route.params.testCaseId);
 
+const { apiConfig } = useApi()
+const testplansApi = new TestplansApi(apiConfig)
 const { testCase, mutateAsyncOnUpdateTestCase, isUpdatingTestCase } = useTestCaseQuery(testPlanId, testCaseId);
-const { testSteps, mutateOnCreateTestSteps, isCreatingTestSteps } = useTestStepQuery(testPlanId, testCaseId);
+const { testSteps, mutateAsyncOnCreateTestSteps, isCreatingTestSteps } = useTestStepQuery(testPlanId, testCaseId);
+const { testStepAttachments, mutateOnCreateTestStepAttachments } = useTestStepAttachmentQuery(testPlanId, testCaseId);
 
 const {
   testCaseTitle: updatedTestCaseTitle,
@@ -209,7 +218,37 @@ watch(testSteps, (newTestSteps) => {
       action: step.action ?? '',
       expectedResult: step.expectedResult ?? '',
     }))
-    // TODO: Update attachements
+  }
+}, { immediate: true });
+
+watch(testStepAttachments, async (newAttachments) => {
+  if (newAttachments && newAttachments.length > 0) {
+    for (const attachment of newAttachments) {
+      const fileName = getAttachmentFileName(attachment.file);
+      const resp = await testplansApi.retrieveTestplansTestcasesTeststepattachmentsDownload(
+        {
+          testPlanId: testPlanId,
+          testCaseId: testCaseId,
+          id: attachment.id
+        }
+      )
+
+      const file = new File(
+        [resp],
+        fileName,
+        {
+          type: resp.type
+        }
+      );
+      const order = testSteps.value?.find(step => step.id === attachment.step)?.order ?? -1;
+      if (order !== -1) {
+        const index = order - 1;
+        if (!updatedTestStepsAttachments.value[index]) {
+          updatedTestStepsAttachments.value[index] = { step: index, attachments: [] };
+        }
+        updatedTestStepsAttachments.value[index].attachments.push(file);
+      }
+    }
   }
 }, { immediate: true });
 
@@ -223,7 +262,7 @@ const updateTestCase = async () => {
     })
 
     if (updatedTestSteps.value.length > 0) {
-      mutateOnCreateTestSteps({
+      await mutateAsyncOnCreateTestSteps({
         testCaseId: testCaseId,
         steps: updatedTestSteps.value.map((step, index) => ({
           action: step.action ?? '',
@@ -231,9 +270,26 @@ const updateTestCase = async () => {
           order: index + 1,
         }))
       });
-    }
 
-    // TODO:
+      const attachmentsToCreate = [];
+      for (const testStepAttachmentData of updatedTestStepsAttachments.value) {
+        if (testStepAttachmentData?.attachments?.length > 0) {
+          for (const attachment of testStepAttachmentData.attachments) {
+            attachmentsToCreate.push({
+              step: testStepAttachmentData.step,
+              file: attachment,
+            });
+          }
+        }
+      }
+
+      if (attachmentsToCreate.length > 0) {
+        mutateOnCreateTestStepAttachments({
+          testCaseId: testCaseId,
+          attachments: attachmentsToCreate
+        });
+      }
+    }
 
     router.push({
       name: 'test-case-list',

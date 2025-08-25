@@ -23,13 +23,16 @@ import type {
   PatchedTestCase,
   PatchedTestPlan,
   PatchedTestResult,
+  RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload404Response,
   TestCase,
   TestPlan,
   TestPlanCreate,
   TestResult,
   TestResultCreate,
   TestResultStep,
+  TestResultStepAttachment,
   TestStep,
+  TestStepAttachment,
 } from '../models/index';
 import {
     CreateTestplansTestcasesTestresultsTestresultstepsRequestInnerFromJSON,
@@ -48,6 +51,8 @@ import {
     PatchedTestPlanToJSON,
     PatchedTestResultFromJSON,
     PatchedTestResultToJSON,
+    RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload404ResponseFromJSON,
+    RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload404ResponseToJSON,
     TestCaseFromJSON,
     TestCaseToJSON,
     TestPlanFromJSON,
@@ -60,8 +65,12 @@ import {
     TestResultCreateToJSON,
     TestResultStepFromJSON,
     TestResultStepToJSON,
+    TestResultStepAttachmentFromJSON,
+    TestResultStepAttachmentToJSON,
     TestStepFromJSON,
     TestStepToJSON,
+    TestStepAttachmentFromJSON,
+    TestStepAttachmentToJSON,
 } from '../models/index';
 
 export interface CreateTestplansRequest {
@@ -79,11 +88,22 @@ export interface CreateTestplansTestcasesTestresultsRequest {
     testResultCreate: Omit<TestResultCreate, 'id'>;
 }
 
+export interface CreateTestplansTestcasesTestresultsTestresultstepattachmentsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    testResultId: number;
+}
+
 export interface CreateTestplansTestcasesTestresultsTestresultstepsRequest {
     testCaseId: number;
     testPlanId: number;
     testResultId: number;
     createTestplansTestcasesTestresultsTestresultstepsRequestInner?: Array<CreateTestplansTestcasesTestresultsTestresultstepsRequestInner>;
+}
+
+export interface CreateTestplansTestcasesTeststepattachmentsRequest {
+    testCaseId: number;
+    testPlanId: number;
 }
 
 export interface CreateTestplansTestcasesTeststepsRequest {
@@ -134,10 +154,21 @@ export interface ListTestplansTestcasesTestresultsRequest {
     tester?: string;
 }
 
+export interface ListTestplansTestcasesTestresultsTestresultstepattachmentsRequest {
+    testCaseId: number;
+    testPlanId: number;
+    testResultId: number;
+}
+
 export interface ListTestplansTestcasesTestresultsTestresultstepsRequest {
     testCaseId: number;
     testPlanId: number;
     testResultId: number;
+}
+
+export interface ListTestplansTestcasesTeststepattachmentsRequest {
+    testCaseId: number;
+    testPlanId: number;
 }
 
 export interface ListTestplansTestcasesTeststepsRequest {
@@ -183,6 +214,19 @@ export interface RetrieveTestplansTestcasesRequest {
 }
 
 export interface RetrieveTestplansTestcasesTestresultsRequest {
+    id: number;
+    testCaseId: number;
+    testPlanId: number;
+}
+
+export interface RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownloadRequest {
+    id: number;
+    testCaseId: number;
+    testPlanId: number;
+    testResultId: number;
+}
+
+export interface RetrieveTestplansTestcasesTeststepattachmentsDownloadRequest {
     id: number;
     testCaseId: number;
     testPlanId: number;
@@ -359,6 +403,61 @@ export class TestplansApi extends runtime.BaseAPI {
     }
 
     /**
+     * Create multiple test result step attachments at once. Replaces all existing attachments for the given test result. Expects an array of test result step attachment objects in the request data.
+     */
+    async createTestplansTestcasesTestresultsTestresultstepattachmentsRaw(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestResultStepAttachment>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling createTestplansTestcasesTestresultsTestresultstepattachments().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling createTestplansTestcasesTestresultsTestresultstepattachments().'
+            );
+        }
+
+        if (requestParameters['testResultId'] == null) {
+            throw new runtime.RequiredError(
+                'testResultId',
+                'Required parameter "testResultId" was null or undefined when calling createTestplansTestcasesTestresultsTestresultstepattachments().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultstepattachments/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))).replace(`{${"testResultId"}}`, encodeURIComponent(String(requestParameters['testResultId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestResultStepAttachmentFromJSON));
+    }
+
+    /**
+     * Create multiple test result step attachments at once. Replaces all existing attachments for the given test result. Expects an array of test result step attachment objects in the request data.
+     */
+    async createTestplansTestcasesTestresultsTestresultstepattachments(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStepAttachment>> {
+        const response = await this.createTestplansTestcasesTestresultsTestresultstepattachmentsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Create multiple test result steps at once. Replaces all existing test result steps for the given test result. Expects an array of test result step objects in the request data.
      */
     async createTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestResultStep>>> {
@@ -413,6 +512,54 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async createTestplansTestcasesTestresultsTestresultsteps(requestParameters: CreateTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStep>> {
         const response = await this.createTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Create multiple test step attachments at once. Replaces all existing attachments for the given test case. Expects an array of test step attachment objects in the request data.
+     */
+    async createTestplansTestcasesTeststepattachmentsRaw(requestParameters: CreateTestplansTestcasesTeststepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestStepAttachment>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling createTestplansTestcasesTeststepattachments().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling createTestplansTestcasesTeststepattachments().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststepattachments/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestStepAttachmentFromJSON));
+    }
+
+    /**
+     * Create multiple test step attachments at once. Replaces all existing attachments for the given test case. Expects an array of test step attachment objects in the request data.
+     */
+    async createTestplansTestcasesTeststepattachments(requestParameters: CreateTestplansTestcasesTeststepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestStepAttachment>> {
+        const response = await this.createTestplansTestcasesTeststepattachmentsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -781,6 +928,59 @@ export class TestplansApi extends runtime.BaseAPI {
 
     /**
      */
+    async listTestplansTestcasesTestresultsTestresultstepattachmentsRaw(requestParameters: ListTestplansTestcasesTestresultsTestresultstepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestResultStepAttachment>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling listTestplansTestcasesTestresultsTestresultstepattachments().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestcasesTestresultsTestresultstepattachments().'
+            );
+        }
+
+        if (requestParameters['testResultId'] == null) {
+            throw new runtime.RequiredError(
+                'testResultId',
+                'Required parameter "testResultId" was null or undefined when calling listTestplansTestcasesTestresultsTestresultstepattachments().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultstepattachments/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))).replace(`{${"testResultId"}}`, encodeURIComponent(String(requestParameters['testResultId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestResultStepAttachmentFromJSON));
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTestresultsTestresultstepattachments(requestParameters: ListTestplansTestcasesTestresultsTestresultstepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStepAttachment>> {
+        const response = await this.listTestplansTestcasesTestresultsTestresultstepattachmentsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
     async listTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters: ListTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestResultStep>>> {
         if (requestParameters['testCaseId'] == null) {
             throw new runtime.RequiredError(
@@ -829,6 +1029,52 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async listTestplansTestcasesTestresultsTestresultsteps(requestParameters: ListTestplansTestcasesTestresultsTestresultstepsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestResultStep>> {
         const response = await this.listTestplansTestcasesTestresultsTestresultstepsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTeststepattachmentsRaw(requestParameters: ListTestplansTestcasesTeststepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TestStepAttachment>>> {
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling listTestplansTestcasesTeststepattachments().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling listTestplansTestcasesTeststepattachments().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststepattachments/`.replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TestStepAttachmentFromJSON));
+    }
+
+    /**
+     */
+    async listTestplansTestcasesTeststepattachments(requestParameters: ListTestplansTestcasesTeststepattachmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TestStepAttachment>> {
+        const response = await this.listTestplansTestcasesTeststepattachmentsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -1223,6 +1469,123 @@ export class TestplansApi extends runtime.BaseAPI {
      */
     async retrieveTestplansTestcasesTestresults(requestParameters: RetrieveTestplansTestcasesTestresultsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TestResult> {
         const response = await this.retrieveTestplansTestcasesTestresultsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Download the attachment file through Django proxy
+     */
+    async retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownloadRaw(requestParameters: RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownloadRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload().'
+            );
+        }
+
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload().'
+            );
+        }
+
+        if (requestParameters['testResultId'] == null) {
+            throw new runtime.RequiredError(
+                'testResultId',
+                'Required parameter "testResultId" was null or undefined when calling retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultstepattachments/{id}/download/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))).replace(`{${"testResultId"}}`, encodeURIComponent(String(requestParameters['testResultId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.BlobApiResponse(response);
+    }
+
+    /**
+     * Download the attachment file through Django proxy
+     */
+    async retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload(requestParameters: RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownloadRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownloadRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Download the attachment file through Django proxy
+     */
+    async retrieveTestplansTestcasesTeststepattachmentsDownloadRaw(requestParameters: RetrieveTestplansTestcasesTeststepattachmentsDownloadRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Blob>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveTestplansTestcasesTeststepattachmentsDownload().'
+            );
+        }
+
+        if (requestParameters['testCaseId'] == null) {
+            throw new runtime.RequiredError(
+                'testCaseId',
+                'Required parameter "testCaseId" was null or undefined when calling retrieveTestplansTestcasesTeststepattachmentsDownload().'
+            );
+        }
+
+        if (requestParameters['testPlanId'] == null) {
+            throw new runtime.RequiredError(
+                'testPlanId',
+                'Required parameter "testPlanId" was null or undefined when calling retrieveTestplansTestcasesTeststepattachmentsDownload().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("jwtAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststepattachments/{id}/download/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))).replace(`{${"testCaseId"}}`, encodeURIComponent(String(requestParameters['testCaseId']))).replace(`{${"testPlanId"}}`, encodeURIComponent(String(requestParameters['testPlanId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.BlobApiResponse(response);
+    }
+
+    /**
+     * Download the attachment file through Django proxy
+     */
+    async retrieveTestplansTestcasesTeststepattachmentsDownload(requestParameters: RetrieveTestplansTestcasesTeststepattachmentsDownloadRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Blob> {
+        const response = await this.retrieveTestplansTestcasesTeststepattachmentsDownloadRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

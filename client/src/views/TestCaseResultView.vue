@@ -11,7 +11,7 @@
         <div class="flex flex-col w-full gap-2">
           <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span>{{ testPlan?.title }}</span></p>
           <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span>{{ testResult?.testerUsername
-              }}</span></p>
+          }}</span></p>
           <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span>{{
             formatConfiguration(testResult?._configuration ?? '') }}</span>
           </p>
@@ -57,11 +57,9 @@
               {{ result.comment }}
             </TableCell>
             <TableCell>
-              <!-- TODO: -->
-              <ul>
-                <li v-for="attachment in []">
-                  <a class="text-blue-600 hover:underline" :href="''" target="_blank">{{ ''
-                    }}</a>
+              <ul v-if="attachmentsByResultStep[result.id]?.length">
+                <li v-for="attachment in attachmentsByResultStep[result.id]" :key="attachment.id">
+                  <span class="text-sm">{{ getAttachmentFileName(attachment.file) }}</span>
                 </li>
               </ul>
             </TableCell>
@@ -85,11 +83,12 @@ import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import useTestResultQuery from '@/composables/useTestResultQuery';
 import useTestResultStepQuery from '@/composables/useTestResultStepQuery';
-import { formatConfiguration } from '@/utils';
+import useTestResultStepAttachmentQuery from '@/composables/useTestResultStepAttachmentQuery';
+import { formatConfiguration, getAttachmentFileName } from '@/utils';
 import { CircleCheck, CircleMinus, CircleX } from 'lucide-vue-next';
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
-import { TestResultStepStatusEnum, ResultEnum } from '@/services';
+import { TestResultStepStatusEnum, ResultEnum, type TestResultStepAttachment } from '@/services';
 
 
 const router = useRoute();
@@ -101,7 +100,22 @@ const { testPlan } = useTestPlanQuery(testPlanId);
 const { testCase } = useTestCaseQuery(testPlanId, testCaseId);
 const { testResult } = useTestResultQuery(testPlanId, testCaseId, testResultId);
 const { testResultSteps } = useTestResultStepQuery(testPlanId, testCaseId, testResultId);
+const { testResultStepAttachments } = useTestResultStepAttachmentQuery(testPlanId, testCaseId, testResultId);
 
+// Group attachments by result step
+const attachmentsByResultStep = computed(() => {
+  if (!testResultStepAttachments.value) return {};
+
+  const attachmentMap: Record<number, TestResultStepAttachment[]> = {};
+  testResultStepAttachments.value.forEach(attachment => {
+    if (!attachmentMap[attachment.resultStep]) {
+      attachmentMap[attachment.resultStep] = [];
+    }
+    attachmentMap[attachment.resultStep].push(attachment);
+  });
+
+  return attachmentMap;
+});
 
 const stepCounts = computed(() => {
   if (!testResultSteps.value) {

@@ -612,6 +612,137 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultstepattachments/:
+    get:
+      operationId: listTestplansTestcasesTestresultsTestresultstepattachments
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testResultId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestResultStepAttachment'
+          description: ''
+    post:
+      operationId: createTestplansTestcasesTestresultsTestresultstepattachments
+      description: Create multiple test result step attachments at once. Replaces
+        all existing attachments for the given test result. Expects an array of test
+        result step attachment objects in the request data.
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testResultId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  result_step:
+                    type: integer
+                    description: ID of the test result step
+                  file:
+                    type: string
+                    format: binary
+                    description: File to attach
+                required:
+                - result_step
+                - file
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestResultStepAttachment'
+          description: ''
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultstepattachments/{id}/download/:
+    get:
+      operationId: retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload
+      description: Download the attachment file through Django proxy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testResultId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+                description: The file content
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+          description: ''
   /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/testresults/{testResultId}/testresultsteps/:
     get:
       operationId: listTestplansTestcasesTestresultsTestresultsteps
@@ -706,6 +837,122 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TestResultStep'
+          description: ''
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststepattachments/:
+    get:
+      operationId: listTestplansTestcasesTeststepattachments
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestStepAttachment'
+          description: ''
+    post:
+      operationId: createTestplansTestcasesTeststepattachments
+      description: Create multiple test step attachments at once. Replaces all existing
+        attachments for the given test case. Expects an array of test step attachment
+        objects in the request data.
+      parameters:
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  step:
+                    type: integer
+                    description: ID of the test step
+                  file:
+                    type: string
+                    format: binary
+                    description: File to attach
+                required:
+                - step
+                - file
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestStepAttachment'
+          description: ''
+  /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststepattachments/{id}/download/:
+    get:
+      operationId: retrieveTestplansTestcasesTeststepattachmentsDownload
+      description: Download the attachment file through Django proxy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testCaseId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: testPlanId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - testplans
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+                description: The file content
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
           description: ''
   /api/v1/testplans/{testPlanId}/testcases/{testCaseId}/teststeps/:
     get:
@@ -1291,6 +1538,21 @@ components:
       - id
       - order
       - result
+    TestResultStepAttachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        result_step:
+          type: integer
+        file:
+          type: string
+          format: uri
+      required:
+      - file
+      - id
+      - result_step
     TestResultStepStatusEnum:
       enum:
       - pass
@@ -1322,6 +1584,21 @@ components:
       - case
       - id
       - order
+    TestStepAttachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        step:
+          type: integer
+        file:
+          type: string
+          format: uri
+      required:
+      - file
+      - id
+      - step
     TokenObtainPair:
       type: object
       properties:

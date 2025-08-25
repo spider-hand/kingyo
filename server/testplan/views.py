@@ -6,7 +6,16 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
 from django.db import transaction
-from .models import TestPlan, TestCase, TestResult, TestStep, TestResultStep
+from django.http import FileResponse, Http404
+from .models import (
+    TestPlan,
+    TestCase,
+    TestResult,
+    TestStep,
+    TestResultStep,
+    TestStepAttachment,
+    TestResultStepAttachment,
+)
 from .serializers import (
     TestPlanSerializer,
     TestPlanCreateSerializer,
@@ -18,6 +27,10 @@ from .serializers import (
     TestStepCreateSerializer,
     TestResultStepSerializer,
     TestResultStepCreateSerializer,
+    TestStepAttachmentSerializer,
+    TestStepAttachmentCreateSerializer,
+    TestResultStepAttachmentSerializer,
+    TestResultStepAttachmentCreateSerializer,
 )
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -285,3 +298,318 @@ class TestResultStepViewSet(
         # Return the created ones
         response_serializer = TestResultStepSerializer(created_steps, many=True)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TestStepAttachmentViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = TestStepAttachment.objects.all()
+    serializer_class = TestStepAttachmentSerializer
+    pagination_class = None  # Disable pagination
+
+    def get_queryset(self):
+        test_case_id = self.kwargs["test_case_id"]
+        # Get all attachments for steps that belong to the given test case
+        return TestStepAttachment.objects.filter(
+            step__case_id=test_case_id
+        ).select_related("step")
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return TestStepAttachmentCreateSerializer
+        return super().get_serializer_class()
+
+    # This schema cannot be used in client because OpenAPI doesn't support array of files in multipart/form-data
+    @extend_schema(
+        request={
+            "multipart/form-data": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "step": {
+                            "type": "integer",
+                            "description": "ID of the test step",
+                        },
+                        "file": {
+                            "type": "string",
+                            "format": "binary",
+                            "description": "File to attach",
+                        },
+                    },
+                    "required": ["step", "file"],
+                },
+            }
+        },
+        responses={
+            201: {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/TestStepAttachment"},
+            }
+        },
+        description="Create multiple test step attachments at once. Replaces all existing attachments for the given test case. Expects an array of test step attachment objects in the request data.",
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Create multiple test step attachments at once.
+        Replaces all existing attachments for the given test case.
+        """
+        test_case_id = self.kwargs["test_case_id"]
+
+        # Parse multipart form data
+        attachments_data = []
+        index = 0
+        while True:
+            step_key = f"{index}_step"
+            file_key = f"{index}_file"
+
+            if step_key not in request.data or file_key not in request.data:
+                break
+
+            attachments_data.append(
+                {"step": int(request.data[step_key]), "file": request.data[file_key]}
+            )
+            index += 1
+
+        if not attachments_data:
+            return Response(
+                {"error": "No attachment data provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Replace all attachments in a single transaction
+        with transaction.atomic():
+            # Delete all existing test step attachments for this test case
+            TestStepAttachment.objects.filter(step__case_id=test_case_id).delete()
+
+            # Create all new attachments
+            created_attachments = []
+            for attachment_data in attachments_data:
+                # Check if TestStep associated with the test case and the order exists
+                step_order = attachment_data.get("step")
+                if step_order is not None:
+                    try:
+                        step = TestStep.objects.get(
+                            order=step_order, case_id=test_case_id
+                        )
+                        attachment_data["step"] = step.pk
+                    except TestStep.DoesNotExist:
+                        return Response(
+                            {
+                                "error": f"Test step {step_order} not found or does not belong to test case {test_case_id}"
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
+                serializer = self.get_serializer(data=attachment_data)
+                if not serializer.is_valid():
+                    return Response(
+                        serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
+                attachment = serializer.save()
+                created_attachments.append(attachment)
+
+        # Return the created ones
+        response_serializer = TestStepAttachmentSerializer(
+            created_attachments, many=True
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses={
+            200: {
+                "type": "string",
+                "format": "binary",
+                "description": "The file content",
+            },
+            404: {"type": "object", "properties": {"detail": {"type": "string"}}},
+        },
+        description="Download the attachment file through Django proxy",
+    )
+    @action(detail=True, methods=["get"])
+    def download(self, request, *args, **kwargs):
+        """Download the attachment file through Django proxy"""
+        attachment = self.get_object()
+
+        if not attachment.file:
+            raise Http404("File not found")
+
+        try:
+            # Get file name for the response
+            file_name = (
+                attachment.file.name.split("/")[-1]
+                if attachment.file.name
+                else "attachment"
+            )
+
+            # Stream the file through Django
+            response = FileResponse(
+                attachment.file.open("rb"),
+                content_type="application/octet-stream",
+                headers={"Content-Disposition": f'inline; filename="{file_name}"'},
+            )
+            return response
+        except (FileNotFoundError, OSError) as e:
+            raise Http404("File not accessible") from e
+
+
+class TestResultStepAttachmentViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = TestResultStepAttachment.objects.all()
+    serializer_class = TestResultStepAttachmentSerializer
+    pagination_class = None  # Disable pagination
+
+    def get_queryset(self):
+        test_result_id = self.kwargs["test_result_id"]
+        # Get all attachments for result steps that belong to the given test result
+        return TestResultStepAttachment.objects.filter(
+            result_step__result_id=test_result_id
+        ).select_related("result_step")
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return TestResultStepAttachmentCreateSerializer
+        return super().get_serializer_class()
+
+    # This schema cannot be used in client because OpenAPI doesn't support array of files in multipart/form-data
+    @extend_schema(
+        request={
+            "multipart/form-data": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "result_step": {
+                            "type": "integer",
+                            "description": "ID of the test result step",
+                        },
+                        "file": {
+                            "type": "string",
+                            "format": "binary",
+                            "description": "File to attach",
+                        },
+                    },
+                    "required": ["result_step", "file"],
+                },
+            }
+        },
+        responses={
+            201: {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/TestResultStepAttachment"},
+            }
+        },
+        description="Create multiple test result step attachments at once. Replaces all existing attachments for the given test result. Expects an array of test result step attachment objects in the request data.",
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Create multiple test result step attachments at once.
+        Replaces all existing attachments for the given test result.
+        """
+        test_result_id = self.kwargs["test_result_id"]
+
+        # Parse multipart form data
+        attachments_data = []
+        index = 0
+        while True:
+            result_step_key = f"{index}_result_step"
+            file_key = f"{index}_file"
+
+            if result_step_key not in request.data or file_key not in request.data:
+                break
+
+            attachments_data.append(
+                {
+                    "result_step": int(request.data[result_step_key]),
+                    "file": request.data[file_key],
+                }
+            )
+            index += 1
+
+        if not attachments_data:
+            return Response(
+                {"error": "No attachment data provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Replace all attachments in a single transaction
+        with transaction.atomic():
+            # Delete all existing test result step attachments for this test result
+            TestResultStepAttachment.objects.filter(
+                result_step__result_id=test_result_id
+            ).delete()
+
+            # Create all new attachments
+            created_attachments = []
+            for attachment_data in attachments_data:
+                # Check if TestResultStep associated with the test result and the order exists
+                result_step_order = attachment_data.get("result_step")
+                if result_step_order is not None:
+                    try:
+                        result_step = TestResultStep.objects.get(
+                            order=result_step_order, result_id=test_result_id
+                        )
+                        attachment_data["result_step"] = result_step.pk
+                    except TestResultStep.DoesNotExist:
+                        return Response(
+                            {
+                                "error": f"Test result step {result_step_order} not found or does not belong to test result {test_result_id}"
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
+                serializer = self.get_serializer(data=attachment_data)
+                if not serializer.is_valid():
+                    return Response(
+                        serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
+                attachment = serializer.save()
+                created_attachments.append(attachment)
+
+        # Return the created ones
+        response_serializer = TestResultStepAttachmentSerializer(
+            created_attachments, many=True
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses={
+            200: {
+                "type": "string",
+                "format": "binary",
+                "description": "The file content",
+            },
+            404: {"type": "object", "properties": {"detail": {"type": "string"}}},
+        },
+        description="Download the attachment file through Django proxy",
+    )
+    @action(detail=True, methods=["get"])
+    def download(self, request, *args, **kwargs):
+        """Download the attachment file through Django proxy"""
+        attachment = self.get_object()
+
+        if not attachment.file:
+            raise Http404("File not found")
+
+        try:
+            # Get file name for the response
+            file_name = (
+                attachment.file.name.split("/")[-1]
+                if attachment.file.name
+                else "attachment"
+            )
+
+            # Stream the file through Django
+            response = FileResponse(
+                attachment.file.open("rb"),
+                content_type="application/octet-stream",
+                headers={"Content-Disposition": f'inline; filename="{file_name}"'},
+            )
+            return response
+        except (FileNotFoundError, OSError) as e:
+            raise Http404("File not accessible") from e

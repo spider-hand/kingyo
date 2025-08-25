@@ -29,7 +29,7 @@ const useTestResultStepQuery = (testPlanId: number, testCaseId: number, testResu
   })
 
   // Mutation for creating test result steps (bulk create/replace)
-  const { mutate: mutateOnCreateTestResultSteps, isPending: isCreatingTestResultSteps } =
+  const { mutate: mutateOnCreateTestResultSteps, mutateAsync: mutateAsyncOnCreateTestResultSteps, isPending: isCreatingTestResultSteps } =
     useMutation({
       mutationFn: async (payload: {
         testResultId: number
@@ -67,6 +67,7 @@ const useTestResultStepQuery = (testPlanId: number, testCaseId: number, testResu
     testResultSteps,
     isFetchingTestResultSteps,
     mutateOnCreateTestResultSteps,
+    mutateAsyncOnCreateTestResultSteps,
     isCreatingTestResultSteps,
   }
 }

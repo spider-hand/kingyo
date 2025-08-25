@@ -1,8 +1,10 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-end w-full">
-      <Button @click="saveTestCase" :disabled="isCreatingTestCase || isCreatingTestSteps">
-        <LoaderCircle v-if="isCreatingTestCase || isCreatingTestSteps" class="animate-spin" />
+      <Button @click="saveTestCase"
+        :disabled="isCreatingTestCase || isCreatingTestSteps || isCreatingTestStepAttachments">
+        <LoaderCircle v-if="isCreatingTestCase || isCreatingTestSteps || isCreatingTestStepAttachments"
+          class="animate-spin" />
         <Save v-else />
         Save Changes
       </Button>
@@ -94,17 +96,17 @@
                   Move current step down
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem class="text-red-600" @click="deleteStep(index)">
+                <ContextMenuItem class="text-red-600" @click="deleteStep(index)" :disabled="testSteps.length <= 1">
                   <Trash class="size-4 text-red-600" />
                   Delete step
                 </ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
-            <TableRow v-if="testStepsAttachments[index]?.length">
+            <TableRow v-if="testStepsAttachments[index]?.attachments?.length">
               <TableCell colspan="4" class="py-2">
                 <div class="flex flex-wrap gap-2">
-                  <div v-for="(attachment, attachmentIndex) in testStepsAttachments[index]" :key="attachmentIndex"
-                    class="flex items-center gap-2 p-2 bg-muted rounded border">
+                  <div v-for="(attachment, attachmentIndex) in testStepsAttachments[index].attachments"
+                    :key="attachmentIndex" class="flex items-center gap-2 p-2 bg-muted rounded border">
                     <Paperclip class="h-4 w-4 text-muted-foreground" />
                     <span class="text-sm truncate max-w-48">{{ attachment.name }}</span>
                     <span class="text-xs text-muted-foreground">
@@ -152,6 +154,7 @@ import TableRow from '@/components/ui/table/TableRow.vue';
 import { Textarea } from '@/components/ui/textarea';
 import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestStepQuery from '@/composables/useTestStepQuery';
+import useTestStepAttachmentQuery from '@/composables/useTestStepAttachmentQuery';
 import useTestStepEditor from '@/composables/useTestStepEditor';
 import { TEST_CASE_STATUS_OPTIONS } from '@/consts';
 import { CornerDownRight, LoaderCircle, MoveDown, MoveUp, Paperclip, Save, Trash, X } from 'lucide-vue-next';
@@ -161,7 +164,8 @@ const route = useRoute()
 const router = useRouter()
 const testPlanId = Number(route.params.testPlanId);
 const { mutateAsyncOnCreateTestCase, isCreatingTestCase } = useTestCaseQuery(testPlanId)
-const { mutateOnCreateTestSteps, isCreatingTestSteps } = useTestStepQuery(testPlanId)
+const { mutateAsyncOnCreateTestSteps, isCreatingTestSteps } = useTestStepQuery(testPlanId)
+const { mutateOnCreateTestStepAttachments, isCreatingTestStepAttachments } = useTestStepAttachmentQuery(testPlanId)
 
 const {
   testCaseTitle,
@@ -192,7 +196,7 @@ const saveTestCase = async () => {
     })
 
     if (testSteps.value.length > 0) {
-      mutateOnCreateTestSteps({
+      await mutateAsyncOnCreateTestSteps({
         testCaseId: testCase.id,
         steps: testSteps.value.map((step, index) => ({
           action: step.action ?? '',
@@ -200,6 +204,25 @@ const saveTestCase = async () => {
           order: index + 1,
         }))
       });
+
+      const attachmentsToCreate = [];
+      for (const testStepAttachmentData of testStepsAttachments.value) {
+        if (testStepAttachmentData?.attachments?.length > 0) {
+          for (const attachment of testStepAttachmentData.attachments) {
+            attachmentsToCreate.push({
+              step: testStepAttachmentData.step,
+              file: attachment,
+            });
+          }
+        }
+      }
+
+      if (attachmentsToCreate.length > 0) {
+        mutateOnCreateTestStepAttachments({
+          testCaseId: testCase.id,
+          attachments: attachmentsToCreate
+        });
+      }
     }
 
     router.push({

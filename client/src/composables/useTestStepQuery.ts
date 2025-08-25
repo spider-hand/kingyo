@@ -25,7 +25,7 @@ const useTestStepQuery = (testPlanId: number, testCaseId?: number) => {
     enabled: !!(testPlanId && testCaseId),
   })
 
-  const { mutate: mutateOnCreateTestSteps, isPending: isCreatingTestSteps } = useMutation({
+  const { mutate: mutateOnCreateTestSteps, mutateAsync: mutateAsyncOnCreateTestSteps, isPending: isCreatingTestSteps } = useMutation({
     mutationFn: async (payload: {
       testCaseId: number
       steps: CreateTestplansTestcasesTeststepsRequestInner[]
@@ -47,6 +47,7 @@ const useTestStepQuery = (testPlanId: number, testCaseId?: number) => {
     testSteps,
     isFetchingTestSteps,
     mutateOnCreateTestSteps,
+    mutateAsyncOnCreateTestSteps,
     isCreatingTestSteps,
   }
 }

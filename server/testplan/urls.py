@@ -7,6 +7,8 @@ from .views import (
     UserViewSet,
     TestStepViewSet,
     TestResultStepViewSet,
+    TestStepAttachmentViewSet,
+    TestResultStepAttachmentViewSet,
 )
 
 # Create router for top-level testplans
@@ -65,8 +67,28 @@ urlpatterns = [
         name="testcase-teststeps-list",
     ),
     path(
+        "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/teststepattachments/",
+        TestStepAttachmentViewSet.as_view({"get": "list", "post": "create"}),
+        name="testcase-teststepattachments-list",
+    ),
+    path(
+        "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/teststepattachments/<int:pk>/download/",
+        TestStepAttachmentViewSet.as_view({"get": "download"}),
+        name="testcase-teststepattachments-download",
+    ),
+    path(
         "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/testresults/<int:test_result_id>/testresultsteps/",
         TestResultStepViewSet.as_view({"get": "list", "post": "create"}),
         name="testresult-testresultsteps-list",
+    ),
+    path(
+        "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/testresults/<int:test_result_id>/testresultstepattachments/",
+        TestResultStepAttachmentViewSet.as_view({"get": "list", "post": "create"}),
+        name="testresult-testresultstepattachments-list",
+    ),
+    path(
+        "testplans/<int:test_plan_id>/testcases/<int:test_case_id>/testresults/<int:test_result_id>/testresultstepattachments/<int:pk>/download/",
+        TestResultStepAttachmentViewSet.as_view({"get": "download"}),
+        name="testresult-testresultstepattachments-download",
     ),
 ]

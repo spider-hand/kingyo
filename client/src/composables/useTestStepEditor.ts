@@ -14,7 +14,10 @@ export const useTestStepEditor = () => {
       expectedResult: '',
     },
   ])
-  const testStepsAttachments = ref<File[][]>([[]])
+
+  const testStepsAttachments = ref<{ step: number; attachments: File[] }[]>([
+    { step: 1, attachments: [] },
+  ])
 
   const showFileUploadDialog = ref(false)
 
@@ -38,7 +41,7 @@ export const useTestStepEditor = () => {
     const currentRow = event.currentTarget as HTMLElement
     const newFocusTarget = event.relatedTarget as HTMLElement
 
-    if (!newFocusTarget || !currentRow.contains(newFocusTarget)) {
+    if (!newFocusTarget || (!currentRow.contains(newFocusTarget) && !showFileUploadDialog.value)) {
       selectedStepIndex.value = null
     }
   }
@@ -48,7 +51,12 @@ export const useTestStepEditor = () => {
       action: '',
       expectedResult: '',
     })
-    testStepsAttachments.value.splice(index + 1, 0, [])
+    testStepsAttachments.value.splice(index + 1, 0, { step: index + 2, attachments: [] })
+
+    // Update step numbers for attachments after the inserted step
+    for (let i = index + 2; i < testStepsAttachments.value.length; i++) {
+      testStepsAttachments.value[i].step = i + 1
+    }
   }
 
   const moveStepUp = (index: number) => {
@@ -57,6 +65,10 @@ export const useTestStepEditor = () => {
       const attachments = testStepsAttachments.value.splice(index, 1)[0]
       testSteps.value.splice(index - 1, 0, step)
       testStepsAttachments.value.splice(index - 1, 0, attachments)
+
+      // Update step numbers for the swapped attachments
+      testStepsAttachments.value[index - 1].step = index
+      testStepsAttachments.value[index].step = index + 1
 
       // Update selected index if the selected step was moved
       if (selectedStepIndex.value === index) {
@@ -74,6 +86,10 @@ export const useTestStepEditor = () => {
       testSteps.value.splice(index + 1, 0, step)
       testStepsAttachments.value.splice(index + 1, 0, attachments)
 
+      // Update step numbers for the swapped attachments
+      testStepsAttachments.value[index].step = index + 1
+      testStepsAttachments.value[index + 1].step = index + 2
+
       // Update selected index if the selected step was moved
       if (selectedStepIndex.value === index) {
         selectedStepIndex.value = index + 1
@@ -87,6 +103,11 @@ export const useTestStepEditor = () => {
     if (testSteps.value.length > 1) {
       testSteps.value.splice(index, 1)
       testStepsAttachments.value.splice(index, 1)
+
+      // Update step numbers for attachments after the deleted step
+      for (let i = index; i < testStepsAttachments.value.length; i++) {
+        testStepsAttachments.value[i].step = i + 1
+      }
 
       // Update selected index if necessary
       if (selectedStepIndex.value === index) {
@@ -104,10 +125,14 @@ export const useTestStepEditor = () => {
 
   const uploadFiles = (files: File[]) => {
     if (selectedStepIndex.value !== null) {
-      if (testStepsAttachments.value[selectedStepIndex.value] === undefined) {
-        testStepsAttachments.value[selectedStepIndex.value] = [...files]
-      } else {
-        testStepsAttachments.value[selectedStepIndex.value].push(...files)
+      const index = testStepsAttachments.value.findIndex(
+        (attachment) => attachment.step === selectedStepIndex.value! + 1,
+      )
+      if (index !== -1) {
+        testStepsAttachments.value[index] = {
+          ...testStepsAttachments.value[index],
+          attachments: [...testStepsAttachments.value[index].attachments, ...files],
+        }
       }
     }
     selectedStepIndex.value = null
@@ -115,7 +140,7 @@ export const useTestStepEditor = () => {
 
   const removeAttachment = (stepIndex: number, attachmentIndex: number) => {
     if (testStepsAttachments.value[stepIndex]) {
-      testStepsAttachments.value[stepIndex].splice(attachmentIndex, 1)
+      testStepsAttachments.value[stepIndex].attachments.splice(attachmentIndex, 1)
     }
   }
 

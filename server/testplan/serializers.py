@@ -1,6 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import TestPlan, TestCase, TestResult, TestStep, TestResultStep
+from .models import (
+    TestPlan,
+    TestCase,
+    TestResult,
+    TestStep,
+    TestResultStep,
+    TestStepAttachment,
+    TestResultStepAttachment,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -120,3 +128,27 @@ class TestResultStepCreateSerializer(serializers.ModelSerializer):
             "status",
             "comment",
         ]
+
+
+class TestStepAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestStepAttachment
+        fields = ["id", "step", "file"]
+
+
+class TestStepAttachmentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestStepAttachment
+        fields = ["step", "file"]
+
+
+class TestResultStepAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestResultStepAttachment
+        fields = ["id", "result_step", "file"]
+
+
+class TestResultStepAttachmentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestResultStepAttachment
+        fields = ["result_step", "file"]

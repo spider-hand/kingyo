@@ -15,6 +15,7 @@ models/PatchedTestCase.ts
 models/PatchedTestPlan.ts
 models/PatchedTestResult.ts
 models/ResultEnum.ts
+models/RetrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload404Response.ts
 models/TestCase.ts
 models/TestCaseStatusEnum.ts
 models/TestPlan.ts
@@ -23,8 +24,10 @@ models/TestPlanStatusEnum.ts
 models/TestResult.ts
 models/TestResultCreate.ts
 models/TestResultStep.ts
+models/TestResultStepAttachment.ts
 models/TestResultStepStatusEnum.ts
 models/TestStep.ts
+models/TestStepAttachment.ts
 models/TokenObtainPair.ts
 models/TokenRefresh.ts
 models/User.ts
