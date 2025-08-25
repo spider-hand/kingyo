@@ -23,7 +23,7 @@
           </FormItem>
         </FormField>
         <Button class="w-full" type="submit" :disabled="isSigningIn">
-          <LoaderCircle v-if="isSigningIn" class="mr-1 animate-spin" />
+          <LoaderCircle v-if="isSigningIn" class="animate-spin" />
           Sign in
         </Button>
         <span class="text-sm text-destructive text-center" v-if="errorMessage">{{ errorMessage }}</span>

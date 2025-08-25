@@ -3,15 +3,15 @@
     <div class="flex flex-row justify-between w-full">
       <div class="flex flex-col w-full gap-4">
         <div class="flex flex-row items-center gap-2">
-          <CircleCheck v-if="testResult?.result === 'pass'" class="size-4 text-green-600"></CircleCheck>
-          <CircleX v-else-if="testResult?.result === 'fail'" class="size-4 text-red-600"></CircleX>
+          <CircleCheck v-if="testResult?.result === ResultEnum.Pass" class="size-4 text-green-600"></CircleCheck>
+          <CircleX v-else-if="testResult?.result === ResultEnum.Fail" class="size-4 text-red-600"></CircleX>
           <CircleMinus v-else class="size-4 text-muted-foreground"></CircleMinus>
           <TitleComponent :title="testCase?.title ?? ''" />
         </div>
         <div class="flex flex-col w-full gap-2">
           <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span>{{ testPlan?.title }}</span></p>
           <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span>{{ testResult?.testerUsername
-          }}</span></p>
+              }}</span></p>
           <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span>{{
             formatConfiguration(testResult?._configuration ?? '') }}</span>
           </p>
@@ -40,8 +40,8 @@
         <TableBody>
           <TableRow class="h-[53px]" v-for="result in testResultSteps" :key="result.order">
             <TableCell>
-              <CircleCheck class="size-4 text-green-600" v-if="result.status === 'pass'" />
-              <CircleX class="size-4 text-red-600" v-else-if="result.status === 'fail'" />
+              <CircleCheck class="size-4 text-green-600" v-if="result.status === TestResultStepStatusEnum.Pass" />
+              <CircleX class="size-4 text-red-600" v-else-if="result.status === TestResultStepStatusEnum.Fail" />
               <CircleMinus class="size-4 text-muted-foreground" v-else />
             </TableCell>
             <TableCell>
@@ -61,7 +61,7 @@
               <ul>
                 <li v-for="attachment in []">
                   <a class="text-blue-600 hover:underline" :href="''" target="_blank">{{ ''
-                  }}</a>
+                    }}</a>
                 </li>
               </ul>
             </TableCell>
@@ -89,6 +89,7 @@ import { formatConfiguration } from '@/utils';
 import { CircleCheck, CircleMinus, CircleX } from 'lucide-vue-next';
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
+import { TestResultStepStatusEnum, ResultEnum } from '@/services';
 
 
 const router = useRoute();
@@ -120,11 +121,11 @@ const stepCounts = computed(() => {
   };
 
   testResultSteps.value.forEach(step => {
-    if (step.status === 'pass') {
+    if (step.status === TestResultStepStatusEnum.Pass) {
       counts.pass++;
-    } else if (step.status === 'fail') {
+    } else if (step.status === TestResultStepStatusEnum.Fail) {
       counts.fail++;
-    } else if (step.status === 'skip') {
+    } else if (step.status === TestResultStepStatusEnum.Skip) {
       counts.skip++;
     }
   });

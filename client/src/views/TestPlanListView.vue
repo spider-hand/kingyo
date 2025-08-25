@@ -3,7 +3,7 @@
     <div class="flex flex-row items-center justify-between w-full">
       <TitleComponent title="Test Plans" />
       <Button @click="$router.push({ name: 'test-plan-add' })">
-        <Plus class="mr-2" />
+        <Plus />
         New test plan
       </Button>
     </div>
@@ -91,7 +91,7 @@
     </Pagination>
     <AlertDialog :open="openDeleteDialog">
       <AlertDialogContent>
-        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+        <AlertDialogTitle>Are you sure you want to delete this test plan?</AlertDialogTitle>
         <AlertDialogDescription>
           This will delete <strong>{{ selectedTestPlan?.title }}</strong> and all associated test cases.
         </AlertDialogDescription>

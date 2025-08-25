@@ -58,26 +58,26 @@
                   </TableCell>
                   <TableCell class="text-right">
                     <Button variant="ghost" size="icon" class="hover:text-green-600"
-                      :class="{ 'text-green-600 bg-green-50': stepResults[step.id]?.status === 'pass' }"
-                      @click="updateStepStatus(step.id, 'pass')">
+                      :class="{ 'text-green-600 bg-green-50': stepResults[step.id]?.status === TestResultStepStatusEnum.Pass }"
+                      @click="updateStepStatus(step.id, TestResultStepStatusEnum.Pass)">
                       <CircleCheck class="size-4" color="currentColor" />
                     </Button>
                   </TableCell>
                   <TableCell class="text-right">
                     <Button variant="ghost" size="icon" class="hover:text-red-600"
-                      :class="{ 'text-red-600 bg-red-50': stepResults[step.id]?.status === 'fail' }"
-                      @click="updateStepStatus(step.id, 'fail')">
+                      :class="{ 'text-red-600 bg-red-50': stepResults[step.id]?.status === TestResultStepStatusEnum.Fail }"
+                      @click="updateStepStatus(step.id, TestResultStepStatusEnum.Fail)">
                       <CircleX class="size-4" color="currentColor" />
                     </Button>
                   </TableCell>
                 </TableRow>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem @click="updateStepStatus(step.id, 'pass')">
+                <ContextMenuItem @click="updateStepStatus(step.id, TestResultStepStatusEnum.Pass)">
                   <CircleCheck class="size-4 text-green-600" />
                   Pass
                 </ContextMenuItem>
-                <ContextMenuItem @click="updateStepStatus(step.id, 'fail')">
+                <ContextMenuItem @click="updateStepStatus(step.id, TestResultStepStatusEnum.Fail)">
                   <CircleX class="size-4 text-red-600" />
                   Fail
                 </ContextMenuItem>
@@ -153,7 +153,7 @@ import useUserQuery from '@/composables/useUserQuery';
 import { CircleCheck, CircleX, LoaderCircle, MessageSquare, Paperclip, Save, X } from 'lucide-vue-next';
 import { useRoute, useRouter } from 'vue-router';
 import { ref, computed, nextTick } from 'vue';
-import type { BrowserEnum, OsEnum, ResultEnum, TestResultStepStatusEnum } from '@/services';
+import { ResultEnum, TestResultStepStatusEnum, type BrowserEnum, type OsEnum } from '@/services';
 import Select from '@/components/ui/select/Select.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
@@ -185,9 +185,9 @@ const selectedStep = ref<number | null>(null);
 const overallResult = computed<ResultEnum>(() => {
   const totalSteps = testSteps.value?.length ?? 0;
   const results = Object.values(stepResults.value);
-  if (results.length < totalSteps) return 'in_progress';
-  else if (results.some(r => r.status === 'fail')) return 'fail';
-  else return 'pass';
+  if (results.length < totalSteps) return ResultEnum.InProgress;
+  else if (results.some(r => r.status === ResultEnum.Fail)) return ResultEnum.Fail;
+  else return ResultEnum.Pass;
 });
 
 const updateStepStatus = (stepId: number, status: TestResultStepStatusEnum) => {
@@ -197,7 +197,7 @@ const updateStepStatus = (stepId: number, status: TestResultStepStatusEnum) => {
     stepResults.value[stepId].status = status;
   }
 
-  if (status === 'fail') {
+  if (status === TestResultStepStatusEnum.Fail) {
     showCommentArea(stepId);
   }
 };
@@ -206,7 +206,7 @@ const showCommentArea = async (stepId: number) => {
   commentingStepId.value = stepId;
 
   if (!stepResults.value[stepId]) {
-    stepResults.value[stepId] = { status: 'skip', comment: '', attachments: [] };
+    stepResults.value[stepId] = { status: TestResultStepStatusEnum.Skip, comment: '', attachments: [] };
   }
 
   // Focus on the textarea after it's rendered
@@ -227,7 +227,7 @@ const hideCommentArea = (stepId: number) => {
 const openFileUploadDialog = (index: number) => {
   const stepId = testSteps.value?.[index]?.id;
   if (stepId && !stepResults.value[stepId]) {
-    stepResults.value[stepId] = { status: 'skip', comment: '', attachments: [] };
+    stepResults.value[stepId] = { status: TestResultStepStatusEnum.Skip, comment: '', attachments: [] };
   }
   selectedStep.value = index
   showFileUploadDialog.value = true
@@ -237,7 +237,7 @@ const uploadFiles = (files: File[]) => {
   if (selectedStep.value !== null && testSteps.value) {
     const stepId = testSteps.value[selectedStep.value].id;
     if (!stepResults.value[stepId]) {
-      stepResults.value[stepId] = { status: 'skip', comment: '', attachments: [] };
+      stepResults.value[stepId] = { status: TestResultStepStatusEnum.Skip, comment: '', attachments: [] };
     }
     stepResults.value[stepId].attachments.push(...files);
   }
@@ -276,7 +276,7 @@ const saveTestResults = async () => {
           order: step.order,
           action: step.action,
           expectedResult: step.expectedResult,
-          status: stepResults.value[step.id]?.status ?? 'skip',
+          status: stepResults.value[step.id]?.status ?? TestResultStepStatusEnum.Skip,
           comment: stepResults.value[step.id]?.comment ?? '',
         }));
 

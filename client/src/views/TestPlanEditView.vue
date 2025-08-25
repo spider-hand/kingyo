@@ -60,7 +60,7 @@ import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import { TEST_PLAN_STATUS_OPTIONS } from '@/consts';
-import { ListTestplansStatusEnum } from '@/services';
+import { ListTestplansStatusEnum, TestPlanStatusEnum } from '@/services';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { watch } from 'vue';
@@ -74,7 +74,7 @@ const { testPlan, isFetchingTestPlan, mutateOnUpdateTestPlan } = useTestPlanQuer
 
 const formSchema = toTypedSchema(z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be at most 100 characters long'),
-  status: z.enum(['not_started', 'in_progress', 'completed'], {
+  status: z.enum([TestPlanStatusEnum.NotStarted, TestPlanStatusEnum.InProgress, TestPlanStatusEnum.Completed], {
     message: 'Status is required',
   }),
 }));

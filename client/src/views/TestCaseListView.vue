@@ -3,7 +3,7 @@
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
       <TitleComponent :title="testPlan?.title ?? ''" />
       <Button v-show="selectedTab === 'define'" @click="$router.push({ name: 'test-case-add' })">
-        <Plus class="mr-2" />
+        <Plus />
         New test case
       </Button>
     </div>
@@ -240,7 +240,7 @@
     </Tabs>
     <AlertDialog :open="openDeleteDialog">
       <AlertDialogContent>
-        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+        <AlertDialogTitle>Are you sure you want to delete this test case?</AlertDialogTitle>
         <AlertDialogDescription>
           This will delete <strong>{{ selectedTestCase?.title }}</strong> and all associated test steps.
         </AlertDialogDescription>
