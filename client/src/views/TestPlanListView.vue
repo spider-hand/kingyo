@@ -204,11 +204,11 @@ const onDeleteTestPlan = () => {
 const getBadgeStyle = (status: string) => {
   switch (status) {
     case "in_progress":
-      return "bg-amber-200 text-amber-950 border-amber-500 border-2";
+      return "bg-amber-100 text-amber-950 rounded-full border border-amber-300";
     case "completed":
-      return "bg-emerald-200 text-emerald-950 border-emerald-500 border-2";
+      return "bg-emerald-100 text-emerald-950 rounded-full border border-emerald-300";
     case "not_started":
-      return "bg-rose-200 text-rose-950 border-rose-500 border-2";
+      return "bg-rose-100 text-rose-950 rounded-full border border-rose-300";
     default:
       return "";
   }

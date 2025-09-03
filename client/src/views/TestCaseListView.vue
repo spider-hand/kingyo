@@ -403,11 +403,11 @@ const onTestResultConfigurationChange = (value: AcceptableValue) => {
 const getBadgeStyle = (status: ListTestplansTestcasesStatusEnum) => {
   switch (status) {
     case ListTestplansTestcasesStatusEnum.Design:
-      return "bg-amber-200 text-amber-950 border-amber-500 border-2";
+      return "bg-amber-100 text-amber-950 rounded-full border border-amber-300";
     case ListTestplansTestcasesStatusEnum.Ready:
-      return "bg-emerald-200 text-emerald-950 border-emerald-500 border-2";
+      return "bg-emerald-100 text-emerald-950 rounded-full border border-emerald-300";
     case ListTestplansTestcasesStatusEnum.Closed:
-      return "bg-slate-200 text-slate-950 border-slate-500 border-2";
+      return "bg-slate-100 text-slate-950 rounded-full border border-slate-300";
     default:
       return "";
   }
