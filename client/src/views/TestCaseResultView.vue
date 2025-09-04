@@ -11,7 +11,7 @@
         <div class="flex flex-col w-full gap-2">
           <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span>{{ testPlan?.title }}</span></p>
           <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span>{{ testResult?.testerUsername
-          }}</span></p>
+              }}</span></p>
           <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span>{{
             formatConfiguration(testResult?._configuration ?? '') }}</span>
           </p>
@@ -59,7 +59,11 @@
             <TableCell>
               <ul v-if="attachmentsByResultStep[result.id]?.length">
                 <li v-for="attachment in attachmentsByResultStep[result.id]" :key="attachment.id">
-                  <span class="text-sm">{{ getAttachmentFileName(attachment.file) }}</span>
+                  <button
+                    class="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer bg-transparent border-none p-0"
+                    @click="downloadTestResultStepAttachment(attachment.id, getAttachmentFileName(attachment.file))">
+                    {{ getAttachmentFileName(attachment.file) }}
+                  </button>
                 </li>
               </ul>
             </TableCell>
@@ -84,11 +88,12 @@ import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import useTestResultQuery from '@/composables/useTestResultQuery';
 import useTestResultStepQuery from '@/composables/useTestResultStepQuery';
 import useTestResultStepAttachmentQuery from '@/composables/useTestResultStepAttachmentQuery';
+import useApi from '@/composables/useApi';
 import { formatConfiguration, getAttachmentFileName } from '@/utils';
 import { CircleCheck, CircleMinus, CircleX } from 'lucide-vue-next';
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
-import { TestResultStepStatusEnum, ResultEnum, type TestResultStepAttachment } from '@/services';
+import { TestResultStepStatusEnum, ResultEnum, type TestResultStepAttachment, TestplansApi } from '@/services';
 
 
 const router = useRoute();
@@ -96,6 +101,8 @@ const testPlanId = Number(router.params.testPlanId);
 const testCaseId = Number(router.params.testCaseId);
 const testResultId = Number(router.params.testResultId);
 
+const { apiConfig } = useApi()
+const testplansApi = new TestplansApi(apiConfig)
 const { testPlan } = useTestPlanQuery(testPlanId);
 const { testCase } = useTestCaseQuery(testPlanId, testCaseId);
 const { testResult } = useTestResultQuery(testPlanId, testCaseId, testResultId);
@@ -164,4 +171,27 @@ const chartData = computed(() => [
     color: 'oklch(70.4% 0.04 256.788)', // slate-400
   },
 ]);
+
+const downloadTestResultStepAttachment = async (attachmentId: number, fileName: string) => {
+  try {
+    const blob = await testplansApi.retrieveTestplansTestcasesTestresultsTestresultstepattachmentsDownload({
+      testPlanId: testPlanId,
+      testCaseId: testCaseId,
+      testResultId: testResultId,
+      id: attachmentId
+    });
+
+    // Create a download link and trigger download
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download attachment:', error);
+  }
+};
 </script>

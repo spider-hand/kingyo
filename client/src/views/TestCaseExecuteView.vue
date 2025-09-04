@@ -62,7 +62,12 @@
                   <TableCell>
                     <ul v-if="attachmentsByStep[step.id]?.length">
                       <li v-for="attachment in attachmentsByStep[step.id]" :key="attachment.id">
-                        <span class="text-sm">{{ getAttachmentFileName(attachment.file) }}</span>
+                        <button 
+                          class="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer bg-transparent border-none p-0"
+                          @click="downloadTestStepAttachment(attachment.id, getAttachmentFileName(attachment.file))"
+                        >
+                          {{ getAttachmentFileName(attachment.file) }}
+                        </button>
                       </li>
                     </ul>
                   </TableCell>
@@ -286,6 +291,28 @@ const removeAttachment = (stepId: number, attachmentIndex: number) => {
 
 const onConfigurationChange = (value: AcceptableValue) => {
   configuration.value = value as string;
+};
+
+const downloadTestStepAttachment = async (attachmentId: number, fileName: string) => {
+  try {
+    const blob = await testplansApi.retrieveTestplansTestcasesTeststepattachmentsDownload({
+      testPlanId: testPlanId,
+      testCaseId: testCaseId,
+      id: attachmentId
+    });
+
+    // Create a download link and trigger download
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download attachment:', error);
+  }
 };
 
 const saveTestResults = async () => {
