@@ -36,6 +36,9 @@
             <TableHead>
               Expected Result
             </TableHead>
+            <TableHead>
+              Attachments
+            </TableHead>
             <TableHead class="text-right">
             </TableHead>
             <TableHead class="text-right">
@@ -55,6 +58,13 @@
                   </TableCell>
                   <TableCell class="whitespace-pre-line align-top">
                     {{ step.expectedResult }}
+                  </TableCell>
+                  <TableCell>
+                    <ul v-if="attachmentsByStep[step.id]?.length">
+                      <li v-for="attachment in attachmentsByStep[step.id]" :key="attachment.id">
+                        <span class="text-sm">{{ getAttachmentFileName(attachment.file) }}</span>
+                      </li>
+                    </ul>
                   </TableCell>
                   <TableCell class="text-right">
                     <Button variant="ghost" size="icon" class="hover:text-green-600"
@@ -149,12 +159,13 @@ import useTestCaseQuery from '@/composables/useTestCaseQuery';
 import useTestResultQuery from '@/composables/useTestResultQuery';
 import useTestResultStepQuery from '@/composables/useTestResultStepQuery';
 import useTestResultStepAttachmentQuery from '@/composables/useTestResultStepAttachmentQuery';
+import useTestStepAttachmentQuery from '@/composables/useTestStepAttachmentQuery';
 import useTestStepQuery from '@/composables/useTestStepQuery';
 import useUserQuery from '@/composables/useUserQuery';
 import { CircleCheck, CircleX, LoaderCircle, MessageSquare, Paperclip, Save, X } from 'lucide-vue-next';
 import { useRoute, useRouter } from 'vue-router';
 import { ref, computed, nextTick } from 'vue';
-import { ResultEnum, TestResultStepStatusEnum, type BrowserEnum, type OsEnum } from '@/services';
+import { ResultEnum, TestResultStepStatusEnum, type BrowserEnum, type OsEnum, type TestStepAttachment } from '@/services';
 import Select from '@/components/ui/select/Select.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
@@ -166,13 +177,20 @@ import type { AcceptableValue } from 'reka-ui';
 import { Textarea } from '@/components/ui/textarea';
 import SelectWrapperComponent from '@/components/SelectWrapperComponent.vue';
 import FileUploadDialog from '@/components/FileUploadDialog.vue';
+import useApi from '@/composables/useApi';
+import { TestplansApi } from '@/services';
+import { getAttachmentFileName } from '@/utils';
 
 const route = useRoute();
 const router = useRouter();
 const testPlanId = Number(route.params.testPlanId);
 const testCaseId = Number(route.params.testCaseId);
+
+const { apiConfig } = useApi()
+const testplansApi = new TestplansApi(apiConfig)
 const { testCase } = useTestCaseQuery(testPlanId, testCaseId);
 const { testSteps } = useTestStepQuery(testPlanId, testCaseId);
+const { testStepAttachments } = useTestStepAttachmentQuery(testPlanId, testCaseId);
 const { mutateOnCreateTestResultAsync, isCreatingTestResult } = useTestResultQuery(testPlanId, testCaseId);
 const { mutateAsyncOnCreateTestResultSteps, isCreatingTestResultSteps } = useTestResultStepQuery(testPlanId, testCaseId);
 const { mutateOnCreateTestResultStepAttachments, isCreatingTestResultStepAttachments } = useTestResultStepAttachmentQuery(testPlanId, testCaseId);
@@ -190,6 +208,21 @@ const overallResult = computed<ResultEnum>(() => {
   if (results.length < totalSteps) return ResultEnum.InProgress;
   else if (results.some(r => r.status === ResultEnum.Fail)) return ResultEnum.Fail;
   else return ResultEnum.Pass;
+});
+
+// Group attachments by step
+const attachmentsByStep = computed(() => {
+  if (!testStepAttachments.value) return {};
+
+  const attachmentMap: Record<number, TestStepAttachment[]> = {};
+  testStepAttachments.value.forEach(attachment => {
+    if (!attachmentMap[attachment.step]) {
+      attachmentMap[attachment.step] = [];
+    }
+    attachmentMap[attachment.step].push(attachment);
+  });
+
+  return attachmentMap;
 });
 
 const updateStepStatus = (stepId: number, status: TestResultStepStatusEnum) => {
