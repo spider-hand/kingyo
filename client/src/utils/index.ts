@@ -1,3 +1,22 @@
+import { BrowserEnum, OsEnum } from '@/services'
+
+export const BROWSER_MAP: Record<BrowserEnum, string> = {
+  [BrowserEnum.Chrome]: 'Chrome',
+  [BrowserEnum.Firefox]: 'Firefox',
+  [BrowserEnum.Safari]: 'Safari',
+  [BrowserEnum.Edge]: 'Edge',
+  [BrowserEnum.Opera]: 'Opera',
+} as const
+
+export const OS_MAP: Record<OsEnum, string> = {
+  [OsEnum.Windows10]: 'Windows 10',
+  [OsEnum.Windows11]: 'Windows 11',
+  [OsEnum.Macos]: 'macOS',
+  [OsEnum.Linux]: 'Linux',
+  [OsEnum.Android]: 'Android',
+  [OsEnum.Ios]: 'iOS',
+} as const
+
 export const snakeToTitle = (str: string): string => {
   return str
     .split('_')
@@ -6,28 +25,11 @@ export const snakeToTitle = (str: string): string => {
 }
 
 export const formatConfiguration = (str: string): string => {
-  const browserMap: Record<string, string> = {
-    chrome: 'Chrome',
-    firefox: 'Firefox',
-    safari: 'Safari',
-    edge: 'Edge',
-    opera: 'Opera',
-  }
-
-  const osMap: Record<string, string> = {
-    windows10: 'Windows 10',
-    windows11: 'Windows 11',
-    macos: 'macOS',
-    linux: 'Linux',
-    android: 'Android',
-    ios: 'iOS',
-  }
-
   const words = str.split(' ')
   const [browser, , os] = words
 
-  const formattedBrowser = browserMap[browser] ?? browser
-  const formattedOs = osMap[os] ?? os
+  const formattedBrowser = BROWSER_MAP[browser as BrowserEnum] ?? browser
+  const formattedOs = OS_MAP[os as OsEnum] ?? os
 
   return `${formattedBrowser} on ${formattedOs}`
 }
