@@ -10,6 +10,8 @@ cd server
 
 source .venv/bin/activate
 
+python manage.py test testplan.tests -v 2
+
 cd ..
 
 pre-commit run --all-files

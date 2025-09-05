@@ -16,7 +16,30 @@ class TestPlanFilter(django_filters.FilterSet):
 class TestCaseFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(lookup_expr="icontains")
     status = django_filters.ChoiceFilter(choices=TEST_CASE_STATUS)
-    latest_result = django_filters.ChoiceFilter(choices=TEST_CASE_RESULTS)
+    latest_result = django_filters.ChoiceFilter(
+        choices=TEST_CASE_RESULTS, method="filter_latest_result"
+    )
+
+    def filter_latest_result(self, queryset, _, value):
+        """Custom filter for latest_result which is a computed property"""
+        if not value:
+            return queryset
+
+        # Get test cases that have results matching the filter value
+        # We need to filter by the latest result for each test case
+        from django.db.models import OuterRef, Subquery
+
+        # Subquery to get the latest result for each test case
+        latest_results = (
+            TestResult.objects.filter(case=OuterRef("pk"))
+            .order_by("-executed_at")
+            .values("result")[:1]
+        )
+
+        # Filter test cases where the latest result matches the value
+        return queryset.annotate(latest_result_value=Subquery(latest_results)).filter(
+            latest_result_value=value
+        )
 
     class Meta:
         model = TestCase
