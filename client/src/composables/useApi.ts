@@ -46,7 +46,7 @@ const useApi = () => {
       })
 
       localStorage.setItem('kingyo_access_token', resp.access)
-    } catch (error) {
+    } catch {
       localStorage.removeItem('kingyo_access_token')
       localStorage.removeItem('kingyo_refresh_token')
       router.push({ name: 'login' })

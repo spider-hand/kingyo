@@ -11,7 +11,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "lint:style": "stylelint \"**/*.{ts,vue}\" --fix",
+    "lint:style": "stylelint \"src/**/*.vue\" --fix",
     "format": "prettier --write src/",
     "prepare": "cd .. && husky",
     "generate:api": "openapi-generator generate -i ../server/schema.yaml -g typescript-fetch -o ./src/services"
@@ -72,8 +72,10 @@
     }
   },
   "lint-staged": {
-    ".src/**/*.{js,ts,vue}": [
-      "eslint --fix",
+    "src/**/*.{js,ts,vue}": [
+      "eslint --fix"
+    ],
+    "src/**/*.vue": [
       "stylelint --fix"
     ]
   }

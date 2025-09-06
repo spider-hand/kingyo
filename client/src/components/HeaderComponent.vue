@@ -2,8 +2,8 @@
   <header class="w-full h-[64px] flex flex-row items-center justify-between px-[16px] py-0 gap-8">
     <LogoComponent />
     <Breadcrumb class="mr-auto">
-      <BreadcrumbList>
-        <template v-if="breadcrumb.length" v-for="(item, index) in breadcrumb" :key="index">
+      <BreadcrumbList v-if="breadcrumb.length">
+        <template v-for="(item, index) in breadcrumb" :key="index">
           <BreadcrumbItem>
             <BreadcrumbLink v-if="index < breadcrumb.length - 1 && item.path">
               <RouterLink :to="item.path">{{ item.name }}</RouterLink>
@@ -73,7 +73,7 @@ const breadcrumb = computed(() => {
 
   // Resolve dynamic parameters in breadcrumb paths and enhance names
   return breadcrumbItems.map(item => {
-    let enhancedItem = { ...item }
+    const enhancedItem = { ...item }
 
     // Resolve path parameters
     if (item.path) {

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import {
   TestplansApi,
-  TestResultStepStatusEnum,
   type CreateTestplansTestcasesTestresultsTestresultstepsRequestInner,
   type TestResultStep,
 } from '@/services'

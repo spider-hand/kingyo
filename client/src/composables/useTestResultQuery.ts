@@ -1,7 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import {
   TestplansApi,
-  type TestResultCreate,
   type PatchedTestResult,
   type ResultEnum,
   type BrowserEnum,

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query'
-import { UsersApi, type User } from '@/services'
+import { UsersApi } from '@/services'
 import useApi from './useApi'
 
 const useUserQuery = () => {
