@@ -155,12 +155,13 @@ STORAGES = {
 AWS_S3_ACCESS_KEY_ID = env.str("MINIO_ROOT_USER", default="minio")
 AWS_S3_SECRET_ACCESS_KEY = env.str("MINIO_ROOT_PASSWORD", default="minio123")
 AWS_STORAGE_BUCKET_NAME = env.str("MINIO_BUCKET_NAME", default="kingyo-storage")
+AWS_S3_REGION_NAME = env.str("MINIO_REGION_NAME", default="us-east-1")
 
 # Internal endpoint for Django to upload files
-AWS_S3_ENDPOINT_URL = env.str("MINIO_ENDPOINT_URL", default="http://storage:9000")
+AWS_S3_ENDPOINT_URL = env.str("MINIO_ENDPOINT_URL", default=None)
 
 # External endpoint for client-side access (used in URL generation)
-AWS_S3_CUSTOM_DOMAIN = env.str("MINIO_EXTERNAL_ENDPOINT", default="localhost:9000")
+AWS_S3_CUSTOM_DOMAIN = env.str("MINIO_EXTERNAL_ENDPOINT", default=None)
 AWS_S3_URL_PROTOCOL = env.str("MINIO_URL_PROTOCOL", default="https:")
 
 # Default primary key field type

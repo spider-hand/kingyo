@@ -27,7 +27,31 @@ class Command(BaseCommand):
 
     help = "Seed the database"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--plans",
+            type=int,
+            default=100,
+            help="Number of test plans to create (default: 100)",
+        )
+        parser.add_argument(
+            "--cases-per-plan",
+            type=int,
+            default=100,
+            help="Number of test cases per plan (default: 100)",
+        )
+        parser.add_argument(
+            "--steps-per-case",
+            type=int,
+            default=10,
+            help="Number of test steps per case (default: 10)",
+        )
+
     def handle(self, *args, **options):
+        plans_count = options["plans"]
+        cases_per_plan = options["cases_per_plan"]
+        steps_per_case = options["steps_per_case"]
+
         # Reset the database
         call_command("flush", interactive=False)
         call_command("migrate", interactive=False)
@@ -55,14 +79,14 @@ class Command(BaseCommand):
         self.stdout.write("Creating seed data..")
 
         fake = Faker()
-        for _ in range(100):
+        for _ in range(plans_count):
             test_plan = TestPlan.objects.create(
                 title=fake.catch_phrase(),
                 description=fake.paragraph(),
                 status=fake.random_element(TEST_PLAN_STATUS)[0],
             )
 
-            for _ in range(100):
+            for _ in range(cases_per_plan):
                 test_case = TestCase.objects.create(
                     plan=test_plan,
                     title=fake.catch_phrase(),
@@ -71,10 +95,10 @@ class Command(BaseCommand):
                 )
 
                 test_steps = []
-                for _ in range(10):
+                for step_idx in range(steps_per_case):
                     test_step = TestStep.objects.create(
                         case=test_case,
-                        order=_ + 1,
+                        order=step_idx + 1,
                         action=fake.sentence(),
                         expected_result=fake.sentence(),
                     )
