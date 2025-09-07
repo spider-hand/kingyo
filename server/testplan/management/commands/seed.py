@@ -14,13 +14,17 @@ from testplan.constants import (
 from environ import Env
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-
 env = Env()
-env.read_env(BASE_DIR / ".env")
+env.read_env()
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
 class Command(BaseCommand):
+    """
+    Seed the database with initial data for testing and development.
+    """
+
     help = "Seed the database"
 
     def handle(self, *args, **options):

@@ -9,6 +9,7 @@ services:
       - "8000:8000"
     volumes:
       - ./server/media:/app/media
+      - ./server/schema.yaml:/app/schema.yaml
     env_file:
       - ./server/.env
     depends_on:

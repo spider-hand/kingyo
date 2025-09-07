@@ -14,4 +14,126 @@
 </defs>
 </svg>
 
- Self-hosted test planner inspired by Azure Test Plans
+Self-hosted QA platform inspired by Azure Test Plans
+
+## Local development
+
+### Prerequisite
+- [Docker](https://www.docker.com/)
+
+### Project setup
+
+1. Clone this repository:
+```sh
+git clone https://github.com/spider-hand/kingyo.git
+cd kingyo
+```
+
+2. Set up environment variables:
+```sh
+cp .env.example .env
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
+
+Change the values if needed.
+
+3. Build and start the services:
+```sh
+docker-compose up --build -d
+``` 
+
+4. Set up the database:
+```sh
+# Create a superuser based on the environment variable and seed initial data
+docker-compose exec server python manage.py seed
+
+# Create a superuser
+docker-compose exec server python manage.py createsuperuser
+```
+
+5. Access the application
+- Frontend (Vue): http://localhost:5173
+- Backend (Django): http://localhost:8000
+- Storage (MinIO): http://localhost:9001
+
+### Management
+
+Docker services management:
+```sh
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# Rebuild services
+docker-compose up --build
+
+# View logs
+docker-compose logs server
+docker-compose logs client
+```
+
+Django management:
+```sh
+# Create migrations
+docker-compose exec server python manage.py makemigrations
+
+# Run migrations
+docker-compose exec server python manage.py migrate
+
+# Create superuser
+docker-compose exec server python manage.py createsuperuser
+
+# Django shell
+docker-compose exec server python manage.py shell
+```
+
+Database management:
+```sh
+# Access PostgreSQL
+docker-compose exec db psql -U user -d kingyo_db
+```
+
+### Development workflow
+This project uses OpenAPI schema generation to keep the frontend and backend in sync. Here's the typical development workflow:
+
+#### Prerequisite
+- [OpenAPI Generator](https://openapi-generator.tech/docs/installation)
+
+1. Backend API schema update
+
+When you make changes to Django API, run:
+```sh
+# This will update OpenAPI schema (schema.yaml)
+docker-compose exec server python manage.py migrate
+```
+
+2. Frontend API client update
+
+```sh
+# Navigate to client directory
+cd client
+
+# Generate API client
+npm run generate:api
+```
+
+### Virtualenv
+
+You need to set up virtualenv to run pre-commit hook.
+
+#### Prerequisite
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+```sh
+# Navigate to server directory
+uv virtualenv
+
+# Activate virtualenv
+source .venv/bin/activate
+
+# Install dependencies
+uv sync
+```
