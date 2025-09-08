@@ -11,6 +11,14 @@ export default mergeConfig(
       root: fileURLToPath(new URL('./', import.meta.url)),
       setupFiles: ['./src/tests/setup.ts'],
       dangerouslyIgnoreUnhandledErrors: true,
+      coverage: {
+        exclude: [
+          ...(configDefaults.coverage.exclude as string[]),
+          '**.config.{ts,js}', // config files
+          'src/components/ui/**', // shadcui components
+          'src/services/**', // OpenAPI generator
+        ],
+      },
     },
   }),
 )

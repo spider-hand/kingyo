@@ -10,7 +10,9 @@ cd server
 
 source .venv/bin/activate
 
-python manage.py test testplan.tests -v 2
+coverage run manage.py test --verbosity=2
+
+coverage report
 
 cd ..
 

@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [ main, develop ]
     paths: [ 'client/**' ]
+  workflow_call:
 
 jobs:
   client-ci:

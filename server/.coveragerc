@@ -1,0 +1,16 @@
+[run]
+branch = True
+
+source =
+    testplan
+
+omit =
+    */tests/*
+    */migrations/*
+    */__init__.py
+
+[report]
+omit =
+    */tests/*
+    */migrations/*
+    */__init__.py

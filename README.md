@@ -14,22 +14,42 @@
 </defs>
 </svg>
 
-Self-hosted QA platform inspired by Azure Test Plans
+[![CI](https://github.com/spider-hand/kingyo/actions/workflows/ci.yml/badge.svg)](https://github.com/spider-hand/kingyo/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![python](https://img.shields.io/badge/python-3.13-blue)]() [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv) <a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangomade124x25.gif" border="0" alt="Made with Django." title="Made with Django." /></a>
+
+Self-hosted test planner inspired by Azure Test Plans
+
+> Kingyo means goldfish 🐠 in Japanese - a lightweight, no-fuss test planner your team can start using today.
+
+## Features
+- Create & manage test plans and cases with ease
+- Instant setup - start using in seconds
+- Self-host on your own infrastructure
+
+## Demo
+
+Try it out [here](https://kingyo-demo.pages.dev/).
+
+Use the following credentials to log in:  
+Username: kingyo-demo  
+Password: password  
 
 ## Local development
 
 ### Prerequisite
+
 - [Docker](https://www.docker.com/)
 
 ### Project setup
 
 1. Clone this repository:
+
 ```sh
 git clone https://github.com/spider-hand/kingyo.git
 cd kingyo
 ```
 
 2. Set up environment variables:
+
 ```sh
 cp .env.example .env
 cp server/.env.example server/.env
@@ -39,11 +59,13 @@ cp client/.env.example client/.env
 Change the values if needed.
 
 3. Build and start the services:
+
 ```sh
 docker-compose up --build -d
-``` 
+```
 
 4. Set up the database:
+
 ```sh
 # Create a superuser based on the environment variable and seed initial data
 docker-compose exec server python manage.py seed
@@ -53,6 +75,7 @@ docker-compose exec server python manage.py createsuperuser
 ```
 
 5. Access the application
+
 - Frontend (Vue): http://localhost:5173
 - Backend (Django): http://localhost:8000
 - Storage (MinIO): http://localhost:9001
@@ -60,6 +83,7 @@ docker-compose exec server python manage.py createsuperuser
 ### Management
 
 Docker services management:
+
 ```sh
 # Start services
 docker-compose up -d
@@ -76,6 +100,7 @@ docker-compose logs client
 ```
 
 Django management:
+
 ```sh
 # Create migrations
 docker-compose exec server python manage.py makemigrations
@@ -91,20 +116,24 @@ docker-compose exec server python manage.py shell
 ```
 
 Database management:
+
 ```sh
 # Access PostgreSQL
 docker-compose exec db psql -U user -d kingyo_db
 ```
 
 ### Development workflow
+
 This project uses OpenAPI schema generation to keep the frontend and backend in sync. Here's the typical development workflow:
 
 #### Prerequisite
+
 - [OpenAPI Generator](https://openapi-generator.tech/docs/installation)
 
 1. Backend API schema update
 
 When you make changes to Django API, run:
+
 ```sh
 # This will update OpenAPI schema (schema.yaml)
 docker-compose exec server python manage.py migrate
@@ -125,6 +154,7 @@ npm run generate:api
 You need to set up virtualenv to run pre-commit hook.
 
 #### Prerequisite
+
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ```sh
@@ -137,3 +167,14 @@ source .venv/bin/activate
 # Install dependencies
 uv sync
 ```
+
+## Contribution
+
+- Bug fix PRs are always welcome.
+- UI changes or new features should not be submitted without prior discussion. Please open an issue first to propose and discuss them.
+
+Thanks for your understanding and contributions.
+
+## License
+
+[MIT](./LICENSE)

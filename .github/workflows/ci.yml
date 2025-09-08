@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  client-ci:
+    uses: ./.github/workflows/client.yml
+
+  server-ci:
+    uses: ./.github/workflows/server.yml
+
+  ci-success:
+    runs-on: ubuntu-latest
+    needs: [client-ci, server-ci]
+    if: always()
+    steps:
+      - name: Check CI Status
+        run: |
+          if [[ "${{ needs.client-ci.result }}" == "success" && "${{ needs.server-ci.result }}" == "success" ]]; then
+            echo "All CI checks passed!"
+            exit 0
+          else
+            echo "Some CI checks failed!"
+            echo "Client CI: ${{ needs.client-ci.result }}"
+            echo "Server CI: ${{ needs.server-ci.result }}"
+            exit 1
+          fi
