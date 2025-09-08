@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     "testplan",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 MIDDLEWARE = [
