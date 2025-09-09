@@ -11,3 +11,5 @@ media/
 fly.toml
 
 .coverage
+
+coverage.xml

@@ -136,7 +136,7 @@ import {
 import Badge from '@/components/ui/badge/Badge.vue';
 import useTestPlanQuery from '@/composables/useTestPlanQuery';
 import { snakeToTitle } from '@/utils';
-import { ListTestplansStatusEnum } from '@/services';
+import { ListTestplansStatusEnum, TestPlanStatusEnum } from '@/services';
 import type { AcceptableValue } from 'reka-ui';
 import AlertDialog from '@/components/ui/alert-dialog/AlertDialog.vue';
 import AlertDialogContent from '@/components/ui/alert-dialog/AlertDialogContent.vue';
@@ -201,13 +201,13 @@ const onDeleteTestPlan = () => {
   }
 }
 
-const getBadgeStyle = (status: string) => {
+const getBadgeStyle = (status: TestPlanStatusEnum) => {
   switch (status) {
-    case "in_progress":
+    case TestPlanStatusEnum.InProgress:
       return "bg-amber-100 text-amber-950 rounded-full border border-amber-300";
-    case "completed":
+    case TestPlanStatusEnum.Completed:
       return "bg-emerald-100 text-emerald-950 rounded-full border border-emerald-300";
-    case "not_started":
+    case TestPlanStatusEnum.NotStarted:
       return "bg-rose-100 text-rose-950 rounded-full border border-rose-300";
     default:
       return "";

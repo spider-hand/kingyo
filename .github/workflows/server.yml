@@ -1,12 +1,6 @@
 name: Server CI
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths: [ 'server/**' ]
-  pull_request:
-    branches: [ main, develop ]
-    paths: [ 'server/**' ]
   workflow_call:
 
 jobs:
@@ -85,4 +79,13 @@ jobs:
 
     - name: Coverage report
       working-directory: ./server
-      run: uv run coverage report
+      run: | 
+        uv run coverage report
+        uv run coverage xml
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: spider-hand/kingyo
+        flags: server
