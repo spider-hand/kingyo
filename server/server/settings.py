@@ -198,5 +198,8 @@ SPECTACULAR_SETTINGS = {
 # CORS settings
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
 # JWT settings
 SIMPLE_JWT = {}
