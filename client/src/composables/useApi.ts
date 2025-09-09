@@ -1,4 +1,5 @@
 import { Configuration, TokenApi } from '@/services'
+import { useQueryClient } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
 
 const useApi = () => {
@@ -32,6 +33,8 @@ const useApi = () => {
     fetchApi: customFetch,
   })
 
+  const queryClient = useQueryClient()
+
   const tokenApi = new TokenApi(apiConfig)
 
   const refreshToken = async () => {
@@ -47,6 +50,7 @@ const useApi = () => {
 
       localStorage.setItem('kingyo_access_token', resp.access)
     } catch {
+      queryClient.clear()
       localStorage.removeItem('kingyo_access_token')
       localStorage.removeItem('kingyo_refresh_token')
       router.push({ name: 'login' })
