@@ -1,4 +1,4 @@
-import { Configuration, TokenApi } from '@/services'
+import { Configuration } from '@/services'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
 
@@ -35,20 +35,28 @@ const useApi = () => {
 
   const queryClient = useQueryClient()
 
-  const tokenApi = new TokenApi(apiConfig)
-
   const refreshToken = async () => {
     try {
       const refreshToken = localStorage.getItem('kingyo_refresh_token')
       if (!refreshToken) throw new Error('No refresh token found')
 
-      const resp = await tokenApi.createTokenRefresh({
-        tokenRefresh: {
-          refresh: refreshToken,
+      // Manually call fetch so it doesn't retry with customFetch infinitely when refresh token is invalid
+      const resp = await fetch(`${apiConfig.basePath}/api/v1/token/refresh/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          refresh: refreshToken,
+        }),
       })
 
-      localStorage.setItem('kingyo_access_token', resp.access)
+      if (!resp.ok) {
+        throw new Error('Failed to refresh token')
+      }
+
+      const data = await resp.json()
+      localStorage.setItem('kingyo_access_token', data.access)
     } catch {
       queryClient.clear()
       localStorage.removeItem('kingyo_access_token')
