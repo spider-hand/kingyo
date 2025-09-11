@@ -1,28 +1,28 @@
 <template>
-  <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
+  <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8" data-testid="test-case-result-view">
     <div class="flex flex-row justify-between w-full">
       <div class="flex flex-col w-full gap-4">
-        <div class="flex flex-row items-center gap-2">
-          <CircleCheck v-if="testResult?.result === ResultEnum.Pass" class="size-4 text-green-600"></CircleCheck>
-          <CircleX v-else-if="testResult?.result === ResultEnum.Fail" class="size-4 text-red-600"></CircleX>
-          <CircleMinus v-else class="size-4 text-muted-foreground"></CircleMinus>
-          <TitleComponent :title="testCase?.title ?? ''" />
+        <div class="flex flex-row items-center gap-2" data-testid="result-header">
+          <CircleCheck v-if="testResult?.result === ResultEnum.Pass" class="size-4 text-green-600" data-testid="pass-icon"></CircleCheck>
+          <CircleX v-else-if="testResult?.result === ResultEnum.Fail" class="size-4 text-red-600" data-testid="fail-icon"></CircleX>
+          <CircleMinus v-else class="size-4 text-muted-foreground" data-testid="neutral-icon"></CircleMinus>
+          <TitleComponent :title="testCase?.title ?? ''" data-testid="test-case-title" />
         </div>
-        <div class="flex flex-col w-full gap-2">
-          <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span>{{ testPlan?.title }}</span></p>
-          <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span>{{ testResult?.testerUsername
+        <div class="flex flex-col w-full gap-2" data-testid="result-details">
+          <p class="text-sm"><span class="text-muted-foreground">Test Plan</span> <span data-testid="test-plan-name">{{ testPlan?.title }}</span></p>
+          <p class="text-sm"><span class="text-muted-foreground">Tester</span> <span data-testid="tester-name">{{ testResult?.testerUsername
               }}</span></p>
-          <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span>{{
+          <p class="text-sm"><span class="text-muted-foreground">Configuration</span> <span data-testid="configuration">{{
             formatConfiguration(testResult?._configuration ?? '') }}</span>
           </p>
-          <p class="text-sm"><span class="text-muted-foreground">Timestamp</span> <span>{{ new
+          <p class="text-sm"><span class="text-muted-foreground">Timestamp</span> <span data-testid="timestamp">{{ new
             Date(testResult?.executedAt ?? '').toLocaleString() }}</span></p>
         </div>
       </div>
-      <DoughnutChart :data="chartData" :size="200" />
+      <DoughnutChart :data="chartData" :size="200" data-testid="result-chart" />
     </div>
     <div class="rounded-md border w-full">
-      <Table>
+      <Table data-testid="result-steps-table">
         <TableHeader>
           <TableRow>
             <TableHead></TableHead>
@@ -38,30 +38,31 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow class="h-[53px]" v-for="result in testResultSteps" :key="result.order">
+          <TableRow class="h-[53px]" v-for="result in testResultSteps" :key="result.order" data-testid="result-step-row">
             <TableCell>
-              <CircleCheck class="size-4 text-green-600" v-if="result.status === TestResultStepStatusEnum.Pass" />
-              <CircleX class="size-4 text-red-600" v-else-if="result.status === TestResultStepStatusEnum.Fail" />
-              <CircleMinus class="size-4 text-muted-foreground" v-else />
+              <CircleCheck class="size-4 text-green-600" v-if="result.status === TestResultStepStatusEnum.Pass" data-testid="step-pass-icon" />
+              <CircleX class="size-4 text-red-600" v-else-if="result.status === TestResultStepStatusEnum.Fail" data-testid="step-fail-icon" />
+              <CircleMinus class="size-4 text-muted-foreground" v-else data-testid="step-skip-icon" />
             </TableCell>
-            <TableCell>
+            <TableCell data-testid="step-order">
               {{ result.order }}
             </TableCell>
-            <TableCell class="whitespace-pre-line align-top">
+            <TableCell class="whitespace-pre-line align-top" data-testid="step-action">
               {{ result.action }}
             </TableCell>
-            <TableCell class="whitespace-pre-line align-top">
+            <TableCell class="whitespace-pre-line align-top" data-testid="step-expected-result">
               {{ result.expectedResult }}
             </TableCell>
-            <TableCell class="whitespace-pre-line align-top">
+            <TableCell class="whitespace-pre-line align-top" data-testid="step-comment">
               {{ result.comment }}
             </TableCell>
-            <TableCell>
+            <TableCell data-testid="step-attachments">
               <ul v-if="attachmentsByResultStep[result.id]?.length">
                 <li v-for="attachment in attachmentsByResultStep[result.id]" :key="attachment.id">
                   <button
                     class="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer bg-transparent border-none p-0"
-                    @click="downloadTestResultStepAttachment(attachment.id, getAttachmentFileName(attachment.file))">
+                    @click="downloadTestResultStepAttachment(attachment.id, getAttachmentFileName(attachment.file))"
+                    data-testid="attachment-download-btn">
                     {{ getAttachmentFileName(attachment.file) }}
                   </button>
                 </li>

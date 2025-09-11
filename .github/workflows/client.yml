@@ -1,50 +1,54 @@
 name: Client CI
 
 on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
   workflow_call:
 
 jobs:
   client-ci:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [20]
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: client/package-lock.json
-        
-    - name: Install dependencies
-      working-directory: ./client
-      run: npm ci
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Lint
-      working-directory: ./client
-      run: npm run lint
-      
-    - name: Style lint
-      working-directory: ./client
-      run: npm run lint:style
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
 
-    - name: Build
-      working-directory: ./client
-      run: npm run build
-      
-    - name: Run tests
-      working-directory: ./client
-      run: npm run test:unit -- --run
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm ci
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        slug: spider-hand/kingyo
-        flags: client
+      - name: Lint
+        working-directory: ./client
+        run: npm run lint
+
+      - name: Style lint
+        working-directory: ./client
+        run: npm run lint:style
+
+      - name: Build
+        working-directory: ./client
+        run: npm run build
+
+      - name: Run tests
+        working-directory: ./client
+        run: npm run test:unit -- --run
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: spider-hand/kingyo
+          flags: client

@@ -1,26 +1,29 @@
 <template>
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-between w-full h-[36px]">
-      <TitleComponent :title="testPlan?.title ?? ''" />
-      <Button v-show="selectedTab === 'define'" @click="$router.push({ name: 'test-case-add' })">
+      <TitleComponent :title="testPlan?.title ?? ''" data-testid="test-plan-title" />
+      <Button data-testid="new-test-case-btn" v-show="selectedTab === 'define'"
+        @click="$router.push({ name: 'test-case-add' })">
         <Plus />
         New test case
       </Button>
     </div>
-    <Tabs :default-value="selectedTab" v-model="selectedTab" class="w-full">
+    <Tabs :default-value="selectedTab" v-model="selectedTab" class="w-full" data-testid="test-case-tabs">
       <TabsList>
-        <TabsTrigger value="define">Define</TabsTrigger>
-        <TabsTrigger value="execute">History</TabsTrigger>
+        <TabsTrigger value="define" data-testid="define-tab">Define</TabsTrigger>
+        <TabsTrigger value="execute" data-testid="execute-tab">History</TabsTrigger>
       </TabsList>
-      <TabsContent class="flex flex-col items-center justify-center w-full gap-4 py-8" value="define">
+      <TabsContent class="flex flex-col items-center justify-center w-full gap-4 py-8" value="define"
+        data-testid="define-tab-content">
         <div class="flex flex-row items-end justify-between w-full">
           <div class="relative w-full mr-4">
             <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
               <ListFilter class="size-6 text-muted-foreground" />
             </div>
-            <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestCaseTitleChange" />
+            <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestCaseTitleChange"
+              data-testid="test-case-title-filter" />
           </div>
-          <SelectWrapperComponent label="Status">
+          <SelectWrapperComponent label="Status" data-testid="status-filter">
             <Select :default-value="status" @update:model-value="onStatusChange">
               <SelectTrigger class="w-[180px] mr-2">
                 <SelectValue placeholder="Status"></SelectValue>
@@ -34,7 +37,7 @@
               </SelectContent>
             </Select>
           </SelectWrapperComponent>
-          <SelectWrapperComponent label="Latest Outcome">
+          <SelectWrapperComponent label="Latest Outcome" data-testid="latest-outcome-filter">
             <Select :default-value="latestResult" @update:model-value="onLatestOutcomeChange">
               <SelectTrigger class="w-[180px]">
                 <SelectValue placeholder="Latest Outcome"></SelectValue>
@@ -50,7 +53,7 @@
           </SelectWrapperComponent>
         </div>
         <div class="rounded-md border w-full">
-          <Table>
+          <Table data-testid="test-cases-table">
             <TableHeader>
               <TableRow>
                 <TableHead>
@@ -67,14 +70,14 @@
             <TableBody>
               <ContextMenu v-for="testCase in testCases" :key="testCase.title">
                 <ContextMenuTrigger as-child>
-                  <TableRow class="cursor-pointer"
+                  <TableRow class="cursor-pointer" data-testid="test-case-row"
                     @click="$router.push({ name: 'test-case-edit', params: { testPlanId, testCaseId: testCase.id } })">
                     <TableCell class="w-[400px] truncate">
                       {{ testCase.title }}
                     </TableCell>
                     <TableCell>
                       <Badge :class="getBadgeStyle(testCase.status!)">{{ snakeToTitle(testCase.status!)
-                        }}
+                      }}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -89,7 +92,7 @@
                       {{ new Date(testCase.executedAt).toLocaleString() }}
                     </TableCell>
                     <TableCell class="text-right">
-                      <Button size="icon" variant="ghost"
+                      <Button size="icon" variant="ghost" data-testid="execute-test-case-btn"
                         @click.stop="$router.push({ name: 'test-case-execute', params: { testPlanId, testCaseId: testCase.id } })">
                         <Play class="h-4 w-4" />
                       </Button>
@@ -97,12 +100,13 @@
                   </TableRow>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
-                  <ContextMenuItem
+                  <ContextMenuItem data-testid="edit-test-case-menu"
                     @click="$router.push({ name: 'test-case-edit', params: { testPlanId: testPlanId, testCaseId: testCase.id } })">
                     <Pencil class="mr-2" />
                     Edit
                   </ContextMenuItem>
-                  <ContextMenuItem class="text-red-600" @click="onConfirmDeletion(testCase.id)">
+                  <ContextMenuItem class="text-red-600" data-testid="delete-test-case-menu"
+                    @click="onConfirmDeletion(testCase.id)">
                     <Trash class="mr-2 text-red-600" />
                     Delete
                   </ContextMenuItem>
@@ -127,13 +131,15 @@
           </PaginationContent>
         </Pagination>
       </TabsContent>
-      <TabsContent class="flex flex-col items-center justify-center w-full gap-4 py-8" value="execute">
+      <TabsContent class="flex flex-col items-center justify-center w-full gap-4 py-8" value="execute"
+        data-testid="execute-tab-content">
         <div class="flex flex-row items-end justify-between w-full">
           <div class="relative w-full mr-4">
             <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
               <ListFilter class="size-6 text-muted-foreground" />
             </div>
-            <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestResultTitleChange" />
+            <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTestResultTitleChange"
+              data-testid="test-result-title-filter" />
           </div>
           <SelectWrapperComponent label="Outcome">
             <Select :default-value="result" @update:model-value="onTestResultOutcomeChange">
@@ -238,15 +244,15 @@
         </Pagination>
       </TabsContent>
     </Tabs>
-    <AlertDialog :open="openDeleteDialog">
+    <AlertDialog :open="openDeleteDialog" data-testid="delete-dialog">
       <AlertDialogContent>
         <AlertDialogTitle>Are you sure you want to delete this test case?</AlertDialogTitle>
         <AlertDialogDescription>
           This will delete <strong>{{ selectedTestCase?.title }}</strong> and all associated test steps.
         </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="onCancelDeletion">Cancel</AlertDialogCancel>
-          <Button variant="destructive" @click="onDeleteTestCase">Delete</Button>
+          <AlertDialogCancel @click="onCancelDeletion" data-testid="cancel-delete-btn">Cancel</AlertDialogCancel>
+          <Button variant="destructive" @click="onDeleteTestCase" data-testid="confirm-delete-btn">Delete</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

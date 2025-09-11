@@ -1,16 +1,20 @@
 name: Server CI
 
 on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
   workflow_call:
 
 jobs:
   server-ci:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
-        python-version: ['3.13']
-    
+        python-version: ["3.13"]
+
     services:
       postgres:
         image: postgres:16
@@ -25,67 +29,67 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
-      with:
-        version: "latest"
-        
-    - name: Install dependencies
-      working-directory: ./server
-      run: uv sync
-      
-    - name: Format check with ruff
-      working-directory: ./server
-      run: uv run ruff format --check .
-      
-    - name: Lint with ruff
-      working-directory: ./server
-      run: uv run ruff check .
-      
-    - name: Check migrations
-      working-directory: ./server
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
-        SECRET_KEY: test-secret-key-for-ci
-        DEBUG: 'True'
-      run: |
-        uv run python manage.py makemigrations --check --dry-run
-        
-    - name: Run migrations
-      working-directory: ./server
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
-        SECRET_KEY: test-secret-key-for-ci
-        DEBUG: 'True'
-      run: uv run python manage.py migrate
-      
-    - name: Run tests
-      working-directory: ./server
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
-        SECRET_KEY: test-secret-key-for-ci
-        DEBUG: 'True'
-      run: uv run coverage run manage.py test --verbosity=2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Coverage report
-      working-directory: ./server
-      run: | 
-        uv run coverage report
-        uv run coverage xml
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        slug: spider-hand/kingyo
-        flags: server
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: uv sync
+
+      - name: Format check with ruff
+        working-directory: ./server
+        run: uv run ruff format --check .
+
+      - name: Lint with ruff
+        working-directory: ./server
+        run: uv run ruff check .
+
+      - name: Check migrations
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: "True"
+        run: |
+          uv run python manage.py makemigrations --check --dry-run
+
+      - name: Run migrations
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: "True"
+        run: uv run python manage.py migrate
+
+      - name: Run tests
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: "True"
+        run: uv run coverage run manage.py test --verbosity=2
+
+      - name: Coverage report
+        working-directory: ./server
+        run: |
+          uv run coverage report
+          uv run coverage xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: spider-hand/kingyo
+          flags: server

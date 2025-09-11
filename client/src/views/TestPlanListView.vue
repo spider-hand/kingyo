@@ -2,7 +2,7 @@
   <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
     <div class="flex flex-row items-center justify-between w-full">
       <TitleComponent title="Test Plans" />
-      <Button @click="$router.push({ name: 'test-plan-add' })">
+      <Button data-testid="new-test-plan-button" @click="$router.push({ name: 'test-plan-add' })">
         <Plus />
         New test plan
       </Button>
@@ -12,10 +12,11 @@
         <div class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
           <ListFilter class="size-6 text-muted-foreground" />
         </div>
-        <Input class="pl-10" placeholder="Filter by title.." @update:model-value="onTitleChange" />
+        <Input data-testid="title-filter-input" class="pl-10" placeholder="Filter by title.."
+          @update:model-value="onTitleChange" />
       </div>
       <SelectWrapperComponent label="Status">
-        <Select default-value="all" @update:model-value="onStatusChange">
+        <Select data-testid="status-filter-select" default-value="all" @update:model-value="onStatusChange">
           <SelectTrigger class="w-[180px]">
             <SelectValue placeholder="Status"></SelectValue>
           </SelectTrigger>
@@ -43,16 +44,18 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow class="cursor-pointer" v-for="testPlan in testPlans" :key="testPlan.id"
+          <TableRow data-testid="test-plan-row" class="cursor-pointer" v-for="testPlan in testPlans" :key="testPlan.id"
             @click="$router.push({ name: 'test-case-list', params: { testPlanId: testPlan.id } })">
-            <TableCell class="w-[400px] truncate">
+            <TableCell data-testid="test-plan-title" class="w-[400px] truncate">
               {{ testPlan.title }}
             </TableCell>
-            <TableCell>
-              <Badge :class="getBadgeStyle(testPlan.status!)">{{ snakeToTitle(testPlan.status!) }}
+            <TableCell data-testid="test-plan-status">
+              <Badge data-testid="status-badge" :class="getBadgeStyle(testPlan.status!)">{{
+                snakeToTitle(testPlan.status!) }}
               </Badge>
             </TableCell>
-            <TableCell>{{ new Date(testPlan.updatedAt).toLocaleString() }}</TableCell>
+            <TableCell data-testid="test-plan-updated-at">{{ new Date(testPlan.updatedAt).toLocaleString() }}
+            </TableCell>
             <TableCell class="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger @click.stop>
@@ -61,10 +64,12 @@
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem @click="$router.push({ name: 'test-plan-edit', params: { id: testPlan.id } })">
+                  <DropdownMenuItem data-testid="edit-test-plan-button"
+                    @click="$router.push({ name: 'test-plan-edit', params: { id: testPlan.id } })">
                     <Pencil class="mr-2" />Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem class="text-red-600!" @click="onConfirmDeletion(testPlan.id)">
+                  <DropdownMenuItem data-testid="delete-test-plan-button" class="text-red-600!"
+                    @click="onConfirmDeletion(testPlan.id)">
                     <Trash class="mr-2 text-red-600" />Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -89,15 +94,16 @@
         <PaginationNext />
       </PaginationContent>
     </Pagination>
-    <AlertDialog :open="openDeleteDialog">
+    <AlertDialog data-testid="delete-confirmation-dialog" :open="openDeleteDialog">
       <AlertDialogContent>
         <AlertDialogTitle>Are you sure you want to delete this test plan?</AlertDialogTitle>
         <AlertDialogDescription>
-          This will delete <strong>{{ selectedTestPlan?.title }}</strong> and all associated test cases.
+          This will delete <strong data-testid="selected-test-plan-title">{{ selectedTestPlan?.title }}</strong> and all
+          associated test cases.
         </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="onCancelDeletion">Cancel</AlertDialogCancel>
-          <Button variant="destructive" @click="onDeleteTestPlan">Delete</Button>
+          <AlertDialogCancel data-testid="cancel-delete-button" @click="onCancelDeletion">Cancel</AlertDialogCancel>
+          <Button data-testid="confirm-delete-button" variant="destructive" @click="onDeleteTestPlan">Delete</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

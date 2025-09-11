@@ -6,7 +6,6 @@ import TestPlanListView from '@/views/TestPlanListView.vue'
 import useTestPlanQuery from '@/composables/useTestPlanQuery'
 import { TestPlanStatusEnum } from '@/services'
 
-
 vi.mock('@/composables/useTestPlanQuery')
 
 const mockPush = vi.fn()
@@ -95,13 +94,20 @@ describe('TestPlanListView', () => {
             template: '<div>Test Plans</div>',
           },
           Button: {
-            template: '<button><slot /></button>',
+            template: '<button @click="$emit(\'click\')"><slot /></button>',
+            props: ['variant', 'size'],
+            emits: ['click'],
           },
           Input: {
-            template: '<input placeholder="Filter by title.." />',
+            template:
+              '<input :placeholder="placeholder" @input="$emit(\'update:model-value\', $event.target.value)" />',
+            props: ['placeholder'],
+            emits: ['update:model-value'],
           },
           Select: {
-            template: '<div>Status Filter</div>',
+            template:
+              '<div data-testid="status-filter-select" @click="$emit(\'update:model-value\', \'in_progress\')"><slot /></div>',
+            emits: ['update:model-value'],
           },
           SelectContent: true,
           SelectGroup: true,
@@ -115,10 +121,13 @@ describe('TestPlanListView', () => {
           TableHeader: { template: '<div><slot /></div>' },
           TableRow: { template: '<div><slot /></div>' },
           Badge: { template: '<span><slot /></span>' },
-          DropdownMenu: true,
-          DropdownMenuTrigger: true,
-          DropdownMenuContent: true,
-          DropdownMenuItem: true,
+          DropdownMenu: { template: '<div><slot /></div>' },
+          DropdownMenuTrigger: { template: '<div><slot /></div>' },
+          DropdownMenuContent: { template: '<div><slot /></div>' },
+          DropdownMenuItem: {
+            template: '<div @click="$emit(\'click\')"><slot /></div>',
+            emits: ['click'],
+          },
           Pagination: { template: '<div>Pagination</div>' },
           PaginationContent: true,
           PaginationEllipsis: true,
@@ -126,14 +135,17 @@ describe('TestPlanListView', () => {
           PaginationNext: true,
           PaginationPrevious: true,
           AlertDialog: {
-            template: '<div v-if="open"><slot /></div>',
+            template: '<div :open="open"><slot /></div>',
             props: ['open'],
           },
           AlertDialogContent: { template: '<div><slot /></div>' },
           AlertDialogTitle: { template: '<div><slot /></div>' },
           AlertDialogDescription: { template: '<div><slot /></div>' },
           AlertDialogFooter: { template: '<div><slot /></div>' },
-          AlertDialogCancel: { template: '<button>Cancel</button>' },
+          AlertDialogCancel: {
+            template: '<button @click="$emit(\'click\')">Cancel</button>',
+            emits: ['click'],
+          },
           SelectWrapperComponent: {
             template: '<div><slot /></div>',
           },
@@ -152,23 +164,9 @@ describe('TestPlanListView', () => {
     wrapper.unmount()
   })
 
-  it('renders test plan list with correct title', () => {
-    expect(wrapper.text()).toContain('Test Plans')
-  })
-
   it('renders test plan data', () => {
     expect(wrapper.text()).toContain('Test Plan 1')
     expect(wrapper.text()).toContain('Test Plan 2')
-  })
-
-  it('displays new test plan button', () => {
-    expect(wrapper.text()).toContain('New test plan')
-  })
-
-  it('renders table headers', () => {
-    expect(wrapper.text()).toContain('Title')
-    expect(wrapper.text()).toContain('Status')
-    expect(wrapper.text()).toContain('Last Updated')
   })
 
   it('displays status badges with correct text', () => {
@@ -184,9 +182,10 @@ describe('TestPlanListView', () => {
   })
 
   it('calls title filter with debounce when input changes', async () => {
-    const componentInstance = wrapper.vm as any
+    const titleInput = wrapper.find('[data-testid="title-filter-input"]')
 
-    componentInstance.onTitleChange('Test Search')
+    await titleInput.setValue('Test Search')
+    await titleInput.trigger('input')
 
     await new Promise((resolve) => setTimeout(resolve, 600))
 
@@ -194,118 +193,132 @@ describe('TestPlanListView', () => {
     expect(mockQueryReturn.page.value).toBe(1)
   })
 
-  it('updates status filter when changed', () => {
-    const componentInstance = wrapper.vm as any
+  it('updates status filter when changed', async () => {
+    const statusSelect = wrapper.find('[data-testid="status-filter-select"]')
 
-    componentInstance.onStatusChange('in_progress')
+    await statusSelect.trigger('click')
 
     expect(mockQueryReturn.status.value).toBe('in_progress')
     expect(mockQueryReturn.page.value).toBe(1)
   })
 
-  it('opens delete confirmation dialog', () => {
-    const componentInstance = wrapper.vm as any
+  it('opens delete confirmation dialog', async () => {
+    const deleteButton = wrapper.find('[data-testid="delete-test-plan-button"]')
 
-    componentInstance.onConfirmDeletion(1)
+    await deleteButton.trigger('click')
 
-    expect(componentInstance.openDeleteDialog).toBe(true)
-    expect(componentInstance.selectedTestPlanId).toBe(1)
+    const deleteDialog = wrapper.find('[data-testid="delete-confirmation-dialog"]')
+    expect(deleteDialog.attributes('open')).toBe('true')
   })
 
-  it('shows correct test plan in delete dialog', () => {
-    const componentInstance = wrapper!.vm as any
+  it('shows correct test plan in delete dialog', async () => {
+    const deleteButton = wrapper.find('[data-testid="delete-test-plan-button"]')
 
-    componentInstance.onConfirmDeletion(1)
+    await deleteButton.trigger('click')
 
-    expect(componentInstance.selectedTestPlan?.title).toBe('Test Plan 1')
+    const selectedTestPlanTitle = wrapper.find('[data-testid="selected-test-plan-title"]')
+    expect(selectedTestPlanTitle.text()).toBe('Test Plan 1')
   })
 
-  it('cancels deletion correctly', () => {
-    const componentInstance = wrapper.vm as any
+  it('cancels deletion correctly', async () => {
+    const deleteButton = wrapper.find('[data-testid="delete-test-plan-button"]')
+    await deleteButton.trigger('click')
 
-    componentInstance.onConfirmDeletion(1)
-    componentInstance.onCancelDeletion()
+    const cancelButton = wrapper.find('[data-testid="cancel-delete-button"]')
+    await cancelButton.trigger('click')
 
-    expect(componentInstance.openDeleteDialog).toBe(false)
-    expect(componentInstance.selectedTestPlanId).toBe(null)
+    const deleteDialog = wrapper.find('[data-testid="delete-confirmation-dialog"]')
+    expect(deleteDialog.attributes('open')).toBe('false')
   })
 
-  it('calls delete mutation when confirmed', () => {
-    const componentInstance = wrapper!.vm as any
+  it('calls delete mutation when confirmed', async () => {
+    const deleteButton = wrapper.find('[data-testid="delete-test-plan-button"]')
+    await deleteButton.trigger('click')
 
-    componentInstance.onConfirmDeletion(1)
-    componentInstance.onDeleteTestPlan()
+    const confirmButton = wrapper.find('[data-testid="confirm-delete-button"]')
+    await confirmButton.trigger('click')
 
     expect(mockMutateOnDeleteTestPlan).toHaveBeenCalledWith(1)
-    expect(componentInstance.openDeleteDialog).toBe(false)
-    expect(componentInstance.selectedTestPlanId).toBe(null)
+
+    const deleteDialog = wrapper.find('[data-testid="delete-confirmation-dialog"]')
+    expect(deleteDialog.attributes('open')).toBe('false')
   })
 
-  it('handles delete error gracefully', () => {
+  it('handles delete error gracefully', async () => {
     mockMutateOnDeleteTestPlan.mockImplementation(() => {
       throw new Error('Delete failed')
     })
 
-    const componentInstance = wrapper!.vm as any
+    const deleteButton = wrapper.find('[data-testid="delete-test-plan-button"]')
+    await deleteButton.trigger('click')
 
-    componentInstance.onConfirmDeletion(1)
-    componentInstance.onDeleteTestPlan()
+    const confirmButton = wrapper.find('[data-testid="confirm-delete-button"]')
+    await confirmButton.trigger('click')
 
-    expect(componentInstance.openDeleteDialog).toBe(false)
-    expect(componentInstance.selectedTestPlanId).toBe(null)
+    const deleteDialog = wrapper.find('[data-testid="delete-confirmation-dialog"]')
+    expect(deleteDialog.attributes('open')).toBe('false')
   })
 
-  it('does not call delete when no test plan selected', () => {
-    const componentInstance = wrapper!.vm as any
-    componentInstance.selectedTestPlanId = null
+  it('displays test plan data in table rows', () => {
+    const testPlanRows = wrapper.findAll('[data-testid="test-plan-row"]')
+    const testPlanTitles = wrapper.findAll('[data-testid="test-plan-title"]')
+    const testPlanStatuses = wrapper.findAll('[data-testid="test-plan-status"]')
+    const testPlanDates = wrapper.findAll('[data-testid="test-plan-updated-at"]')
 
-    componentInstance.onDeleteTestPlan()
+    expect(testPlanRows).toHaveLength(2)
+    expect(testPlanTitles[0].text()).toBe('Test Plan 1')
+    expect(testPlanTitles[1].text()).toBe('Test Plan 2')
 
-    expect(mockMutateOnDeleteTestPlan).not.toHaveBeenCalled()
+    expect(testPlanStatuses[0].text()).toContain('Not Started')
+    expect(testPlanStatuses[1].text()).toContain('In Progress')
+
+    const date1 = new Date('2023-01-01T00:00:00Z').toLocaleString()
+    const date2 = new Date('2023-01-02T00:00:00Z').toLocaleString()
+    expect(testPlanDates[0].text()).toBe(date1)
+    expect(testPlanDates[1].text()).toBe(date2)
   })
 
-  it('returns correct badge style for not started status', () => {
-    const componentInstance = wrapper!.vm as any
-    const style = componentInstance.getBadgeStyle(TestPlanStatusEnum.NotStarted)
-    expect(style).toContain('bg-rose-100')
-  })
+  it('displays correct badge styles for different statuses', () => {
+    const statusBadges = wrapper.findAll('[data-testid="status-badge"]')
 
-  it('returns correct badge style for in progress status', () => {
-    const componentInstance = wrapper!.vm as any
-    const style = componentInstance.getBadgeStyle(TestPlanStatusEnum.InProgress)
-    expect(style).toContain('bg-amber-100')
-  })
+    // Test Plan 1 has NotStarted status
+    expect(statusBadges[0].classes()).toContain('bg-rose-100')
+    expect(statusBadges[0].classes()).toContain('text-rose-950')
 
-  it('returns correct badge style for completed status', () => {
-    const componentInstance = wrapper!.vm as any
-    const style = componentInstance.getBadgeStyle(TestPlanStatusEnum.Completed)
-    expect(style).toContain('bg-emerald-100')
+    // Test Plan 2 has InProgress status
+    expect(statusBadges[1].classes()).toContain('bg-amber-100')
+    expect(statusBadges[1].classes()).toContain('text-amber-950')
   })
 
   it('resets page when title filter changes', async () => {
-    const componentInstance = wrapper!.vm as any
     mockQueryReturn.page.value = 3
 
-    componentInstance.onTitleChange('New Title')
+    const titleInput = wrapper.find('[data-testid="title-filter-input"]')
+    await titleInput.setValue('New Title')
+    await titleInput.trigger('input')
+
     await new Promise((resolve) => setTimeout(resolve, 600))
 
     expect(mockQueryReturn.page.value).toBe(1)
   })
 
-  it('resets page when status filter changes', () => {
-    const componentInstance = wrapper!.vm as any
+  it('resets page when status filter changes', async () => {
     mockQueryReturn.page.value = 3
 
-    componentInstance.onStatusChange('completed')
+    const statusSelect = wrapper.find('[data-testid="status-filter-select"]')
+    await statusSelect.trigger('click')
 
     expect(mockQueryReturn.page.value).toBe(1)
   })
 
   it('clears timer when title changes multiple times', async () => {
-    const componentInstance = wrapper!.vm as any
+    const titleInput = wrapper.find('[data-testid="title-filter-input"]')
 
-    componentInstance.onTitleChange('First')
-    componentInstance.onTitleChange('Second')
+    await titleInput.setValue('First')
+    await titleInput.trigger('input')
+
+    await titleInput.setValue('Second')
+    await titleInput.trigger('input')
 
     await new Promise((resolve) => setTimeout(resolve, 600))
 

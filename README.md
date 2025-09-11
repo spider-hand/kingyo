@@ -14,7 +14,7 @@
 </defs>
 </svg>
 
-[![CI](https://github.com/spider-hand/kingyo/actions/workflows/ci.yml/badge.svg)](https://github.com/spider-hand/kingyo/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![python](https://img.shields.io/badge/python-3.13-blue)]() [![codecov](https://codecov.io/gh/spider-hand/kingyo/graph/badge.svg?token=TF5PTXGFF4)](https://codecov.io/gh/spider-hand/kingyo) [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv) <a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangomade124x25.gif" border="0" alt="Made with Django." title="Made with Django." /></a>
+[![CI](https://github.com/spider-hand/kingyo/actions/workflows/ci.yml/badge.svg)](https://github.com/spider-hand/kingyo/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![python](https://img.shields.io/badge/python-3.13-blue)]() [![codecov](https://codecov.io/gh/spider-hand/kingyo/graph/badge.svg?token=R4189NC3XJ)](https://codecov.io/gh/spider-hand/kingyo) [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv) <a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangomade124x25.gif" border="0" alt="Made with Django." title="Made with Django." /></a>
 
 Self-hosted test planner inspired by Azure Test Plans
 

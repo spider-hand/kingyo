@@ -1,23 +1,23 @@
 <template>
-  <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8">
-    <div class="flex flex-row items-center justify-between w-full h-[36px]">
-      <TitleComponent :title="testCase?.title ?? ''" />
-      <Button @click="saveTestResults">
-        <LoaderCircle v-if="isCreatingTestResult || isCreatingTestResultSteps || isCreatingTestResultStepAttachments" class="mr-2 animate-spin" />
-        <Save v-else class="mr-2" />
+  <div class="flex flex-col items-center justify-center max-w-5xl w-full gap-8 p-8" data-testid="test-case-execute-view">
+    <div class="flex flex-row items-center justify-between w-full h-[36px]" data-testid="header">
+      <TitleComponent :title="testCase?.title ?? ''" data-testid="test-case-title" />
+      <Button @click="saveTestResults" data-testid="save-btn">
+        <LoaderCircle v-if="isCreatingTestResult || isCreatingTestResultSteps || isCreatingTestResultStepAttachments" class="mr-2 animate-spin" data-testid="loading-icon" />
+        <Save v-else class="mr-2" data-testid="save-icon" />
         Save
       </Button>
     </div>
-    <div class="flex flex-row items-center w-full">
+    <div class="flex flex-row items-center w-full" data-testid="configuration-section">
       <SelectWrapperComponent label="Configuration">
-        <Select :default-value="configuration" @update:model-value="onConfigurationChange">
-          <SelectTrigger class="w-[240px] mr-2">
+        <Select :default-value="configuration" @update:model-value="onConfigurationChange" data-testid="configuration-select">
+          <SelectTrigger class="w-[240px] mr-2" data-testid="configuration-trigger">
             <SelectValue placeholder="Configuration"></SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectItem v-for="config in TEST_CASE_RESULT_CONFIGURATION_OPTIONS" :key="config.value"
-                :value="config.value">
+                :value="config.value" :data-testid="`config-option-${config.value}`">
                 {{ config.label }}
               </SelectItem>
             </SelectGroup>
@@ -25,8 +25,8 @@
         </Select>
       </SelectWrapperComponent>
     </div>
-    <div class="rounded-md border w-full">
-      <Table>
+    <div class="rounded-md border w-full" data-testid="steps-table-container">
+      <Table data-testid="steps-table">
         <TableHeader>
           <TableRow>
             <TableHead>
@@ -49,7 +49,7 @@
           <template v-for="(step, index) in testSteps" :key="step.id">
             <ContextMenu>
               <ContextMenuTrigger as-child>
-                <TableRow class="cursor-pointer" :data-step-id="step.id">
+                <TableRow class="cursor-pointer" :data-step-id="step.id" :data-testid="`step-row-${step.id}`">
                   <TableCell>
                     {{ step.order }}
                   </TableCell>
@@ -65,6 +65,7 @@
                         <button 
                           class="text-sm text-blue-600 hover:text-blue-800 underline cursor-pointer bg-transparent border-none p-0"
                           @click="downloadTestStepAttachment(attachment.id, getAttachmentFileName(attachment.file))"
+                          :data-testid="`attachment-download-${attachment.id}`"
                         >
                           {{ getAttachmentFileName(attachment.file) }}
                         </button>
@@ -74,14 +75,16 @@
                   <TableCell class="text-right">
                     <Button variant="ghost" size="icon" class="hover:text-green-600"
                       :class="{ 'text-green-600 bg-green-50': stepResults[step.id]?.status === TestResultStepStatusEnum.Pass }"
-                      @click="updateStepStatus(step.id, TestResultStepStatusEnum.Pass)">
+                      @click="updateStepStatus(step.id, TestResultStepStatusEnum.Pass)"
+                      :data-testid="`pass-btn-${step.id}`">
                       <CircleCheck class="size-4" color="currentColor" />
                     </Button>
                   </TableCell>
                   <TableCell class="text-right">
                     <Button variant="ghost" size="icon" class="hover:text-red-600"
                       :class="{ 'text-red-600 bg-red-50': stepResults[step.id]?.status === TestResultStepStatusEnum.Fail }"
-                      @click="updateStepStatus(step.id, TestResultStepStatusEnum.Fail)">
+                      @click="updateStepStatus(step.id, TestResultStepStatusEnum.Fail)"
+                      :data-testid="`fail-btn-${step.id}`">
                       <CircleX class="size-4" color="currentColor" />
                     </Button>
                   </TableCell>
@@ -107,29 +110,34 @@
               </ContextMenuContent>
             </ContextMenu>
             <TableRow
-              v-if="commentingStepId === step.id || stepResults[step.id]?.comment?.trim() || stepResults[step.id]?.attachments?.length">
+              v-if="commentingStepId === step.id || stepResults[step.id]?.comment?.trim() || stepResults[step.id]?.attachments?.length"
+              :data-testid="`comment-row-${step.id}`">
               <TableCell colspan="5" class="py-4">
                 <div class="flex flex-col gap-2">
                   <div v-if="commentingStepId === step.id || stepResults[step.id]?.comment?.trim()">
                     <Textarea v-if="commentingStepId === step.id" v-model="stepResults[step.id].comment"
                       :placeholder="`Add your comment for step ${step.order}`" class="text-sm"
-                      @blur="hideCommentArea(step.id)"></Textarea>
+                      @blur="hideCommentArea(step.id)"
+                      :data-testid="`comment-textarea-${step.id}`"></Textarea>
                     <div v-else class="whitespace-pre-line align-top cursor-pointer" role="button"
-                      @click="showCommentArea(step.id)">
+                      @click="showCommentArea(step.id)"
+                      :data-testid="`comment-display-${step.id}`">
                       {{ stepResults[step.id]?.comment }}
                     </div>
                   </div>
                   <div v-if="stepResults[step.id]?.attachments?.length">
-                    <div class="flex flex-row flex-wrap gap-2">
+                    <div class="flex flex-row flex-wrap gap-2" :data-testid="`attachments-list-${step.id}`">
                       <div v-for="(attachment, attachmentIndex) in stepResults[step.id].attachments"
-                        :key="attachmentIndex" class="flex items-center gap-2 p-2 bg-muted rounded border">
+                        :key="attachmentIndex" class="flex items-center gap-2 p-2 bg-muted rounded border"
+                        :data-testid="`uploaded-attachment-${step.id}-${attachmentIndex}`">
                         <Paperclip class="h-4 w-4 text-muted-foreground" />
                         <span class="text-sm truncate max-w-48">{{ attachment.name }}</span>
                         <span class="text-xs text-muted-foreground">
                           ({{ (attachment.size / 1024).toFixed(1) }}KB)
                         </span>
                         <Button variant="ghost" size="sm" @click="removeAttachment(step.id, attachmentIndex)"
-                          class="h-6 w-6 p-0 text-muted-foreground">
+                          class="h-6 w-6 p-0 text-muted-foreground"
+                          :data-testid="`remove-attachment-${step.id}-${attachmentIndex}`">
                           <X class="h-4 w-4" />
                         </Button>
                       </div>
@@ -143,7 +151,7 @@
       </Table>
     </div>
     <FileUploadDialog :open="showFileUploadDialog" :step-number="selectedStep! + 1"
-      @open="showFileUploadDialog = $event" @upload-files="uploadFiles" />
+      @open="showFileUploadDialog = $event" @upload-files="uploadFiles" data-testid="file-upload-dialog" />
   </div>
 </template>
 
