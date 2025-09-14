@@ -22,7 +22,6 @@ export default defineConfigWithVueTs(
     '**/src/services/**', // OpenAPI generator
     '**/src/components/ui/**', // Shadcn UI auto-generated components
     '**/.vite/**',
-    '**/src/tests/**',
   ]),
 
   pluginVue.configs['flat/essential'],
@@ -30,7 +29,10 @@ export default defineConfigWithVueTs(
 
   {
     ...pluginVitest.configs.recommended,
-    files: ['src/**/__tests__/*'],
+    files: ['src/tests/**/*'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
   skipFormatting,
 )

@@ -41,7 +41,7 @@ vi.mock('vue-router', () => ({
 }))
 
 vi.mock('@/utils', () => ({
-  getAttachmentFileName: (filePath: string) => 'test-file.png',
+  getAttachmentFileName: () => 'test-file.png',
 }))
 
 vi.mock('@/consts', () => ({

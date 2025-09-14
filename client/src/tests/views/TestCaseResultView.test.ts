@@ -32,7 +32,7 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/utils', () => ({
   formatConfiguration: vi.fn((str) => `Mocked Config: ${str}`),
-  getAttachmentFileName: vi.fn((filePath) => 'test-file.png'),
+  getAttachmentFileName: vi.fn(() => 'test-file.png'),
 }))
 
 const mockDownloadMethod = vi.fn().mockResolvedValue(new Blob())

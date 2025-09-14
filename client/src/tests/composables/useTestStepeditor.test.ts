@@ -218,7 +218,6 @@ describe('useTestStepEditor', () => {
     composable.insertStep(0)
     composable.insertStep(1)
     const initialLength = composable.testSteps.value.length
-    const initialAttachmentsLength = composable.testStepsAttachments.value.length
     composable.deleteStep(1)
 
     expect(composable.testSteps.value).toHaveLength(initialLength - 1)
