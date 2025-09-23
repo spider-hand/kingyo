@@ -41,7 +41,7 @@ const useApi = () => {
       if (!refreshToken) throw new Error('No refresh token found')
 
       // Manually call fetch so it doesn't retry with customFetch infinitely when refresh token is invalid
-      const resp = await fetch(`${apiConfig.basePath}/api/v1/token/refresh/`, {
+      const resp = await fetch(`${apiConfig.basePath}/api/v1/token/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
