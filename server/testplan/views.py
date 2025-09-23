@@ -387,6 +387,14 @@ class TestStepAttachmentViewSet(
             # Create all new attachments
             created_attachments = []
             for attachment_data in attachments_data:
+                # Validate the file type
+                file_obj = attachment_data.get("file")
+                if file_obj and file_obj.name.lower().endswith(".exe"):
+                    return Response(
+                        {"error": "Executable files (.exe) are not allowed."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
                 # Check if TestStep associated with the test case and the order exists
                 step_order = attachment_data.get("step")
                 if step_order is not None:
@@ -547,6 +555,14 @@ class TestResultStepAttachmentViewSet(
             # Create all new attachments
             created_attachments = []
             for attachment_data in attachments_data:
+                # Validate the file type
+                file_obj = attachment_data.get("file")
+                if file_obj and file_obj.name.lower().endswith(".exe"):
+                    return Response(
+                        {"error": "Executable files (.exe) are not allowed."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
                 # Check if TestResultStep associated with the test result and the order exists
                 result_step_order = attachment_data.get("result_step")
                 if result_step_order is not None:

@@ -587,6 +587,27 @@ class TestStepAttachmentAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("error", response.data)
 
+    def test_create_test_step_attachments_with_exe_file_returns_400(self):
+        """Test that uploading a .exe file returns 400"""
+        self.authenticate()
+
+        exe_file = SimpleUploadedFile(
+            "malicious.exe",
+            b"fake exe content",
+            content_type="application/x-msdownload",
+        )
+        data = {
+            "0_step": str(self.test_step_1.order),
+            "0_file": exe_file,
+        }
+        response = self.client.post(
+            f"/api/v1/testplans/{self.test_plan.id}/testcases/{self.test_case.id}/teststepattachments/",
+            data,
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+
     def test_download_attachment_returns_file_response(self):
         """Test that download endpoint returns file response"""
         self.authenticate()
@@ -791,6 +812,27 @@ class TestResultStepAttachmentAPITests(APITestCase):
             format="multipart",
         )
 
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+
+    def test_create_test_result_step_attachments_with_exe_file_returns_400(self):
+        """Test that uploading a .exe file returns 400"""
+        self.authenticate()
+
+        exe_file = SimpleUploadedFile(
+            "malicious.exe",
+            b"fake exe content",
+            content_type="application/x-msdownload",
+        )
+        data = {
+            "0_result_step": str(self.test_result_step_1.order),
+            "0_file": exe_file,
+        }
+        response = self.client.post(
+            f"/api/v1/testplans/{self.test_plan.id}/testcases/{self.test_case.id}/testresults/{self.test_result.id}/testresultstepattachments/",
+            data,
+            format="multipart",
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("error", response.data)
 

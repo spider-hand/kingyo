@@ -19,7 +19,7 @@
               Click to upload or drag and drop
             </p>
             <p class="text-xs text-muted-foreground">
-              Any file type, up to 10MB each
+              Any file type except .exe, up to 10MB each
             </p>
           </div>
           <div v-else class="flex flex-col items-center gap-2">
@@ -94,17 +94,23 @@ const openFileDialog = () => {
   fileInput.value?.click()
 }
 
+const isAllowedFileType = (file: File) => {
+  return !file.name.toLocaleLowerCase().endsWith('.exe')
+}
+
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) {
-    selectedFiles.value.push(...target.files)
+    const validFiles = Array.from(target.files).filter(isAllowedFileType)
+    selectedFiles.value.push(...validFiles)
   }
 }
 
 const handleDrop = (event: DragEvent) => {
   isDragOver.value = false
   if (event.dataTransfer?.files) {
-    selectedFiles.value.push(...event.dataTransfer.files)
+    const validFiles = Array.from(event.dataTransfer.files).filter(isAllowedFileType)
+    selectedFiles.value.push(...validFiles)
   }
 }
 
