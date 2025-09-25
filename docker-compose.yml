@@ -61,6 +61,20 @@ services:
       - .env
     command: server /data --console-address ":9001"
 
+  create-bucket:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1
+    container_name: kingyo-create-bucket
+    depends_on:
+      - storage
+    restart: "on-failure"
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      mc alias set minio http://kingyo-storage:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      mc mb minio/${MINIO_BUCKET_NAME};
+      exit 0;
+      "
+
 volumes:
   db_data:
     driver: local
